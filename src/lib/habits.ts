@@ -59,7 +59,17 @@ export function parseState(raw: string | null): AppState {
   try {
     const data = JSON.parse(raw)
     if (data && data.version === 1 && Array.isArray(data.habits) && typeof data.threshold === 'number') {
-      return data as AppState
+      // Fill in anything older versions did not save, so old data still opens.
+      const habits = data.habits
+        .filter((h: unknown) => h && typeof h === 'object')
+        .map((h: Habit) => ({
+          ...h,
+          efforts: h.efforts ?? {},
+          track: h.track ?? { type: 'effort' },
+          schedule: h.schedule ?? { kind: 'daily' },
+        }))
+      const stickers = data.stickers && typeof data.stickers === 'object' ? data.stickers : {}
+      return { ...data, habits, stickers } as AppState
     }
   } catch {
     /* fall through to a fresh state */
