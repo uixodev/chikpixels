@@ -1,0 +1,43 @@
+{
+ "id": "homer",
+ "name": "Homer",
+ "theme": "characters",
+ "width": 24,
+ "height": 24,
+ "background": "#51f0ff",
+ "palette": {
+  "a": "#000c13",
+  "b": "#fcdb00",
+  "c": "#d4b905",
+  "d": "#ffea64",
+  "e": "#ffffff",
+  "f": "#c1b07f",
+  "g": "#9a8e67"
+ },
+ "rows": [
+  "........................",
+  "...........aaaa.........",
+  "..........a.a..a........",
+  ".........aaaaaaaa.......",
+  "........abababbca.......",
+  "........abbbbbbcaa......",
+  ".......adbbbbbbbca......",
+  ".......adbbbbbbbbca.....",
+  ".......adbbbbbbbbca.....",
+  ".......adbbbaaabaaa.....",
+  "......aadbbaeeeaeeea....",
+  ".....a.aadbaeaeaeaea....",
+  ".......adbbaeeeaeeea....",
+  "......aaadbbaaaaaaa.....",
+  "......abadbbbbbbbca.....",
+  "......aaadbbaaaaaaaa....",
+  "........adbaffffffga....",
+  "........adaffaffffga....",
+  "........adaffaaaaaa.....",
+  ".......aadbaffffa.......",
+  "......aeadbbaaaa........",
+  ".....aaeeabbbbbaa.......",
+  ".....aeaeeaabbbaea......",
+  "....aeeaaeeeabaeeea....."
+ ]
+}

@@ -1,0 +1,43 @@
+{
+ "id": "lisa",
+ "name": "Lisa",
+ "theme": "characters",
+ "width": 24,
+ "height": 24,
+ "background": "#51f0ff",
+ "palette": {
+  "a": "#000c13",
+  "b": "#ffea64",
+  "c": "#fcdb00",
+  "d": "#d4b905",
+  "e": "#ffffff",
+  "f": "#f05f30",
+  "g": "#ca4b22"
+ },
+ "rows": [
+  "........................",
+  "............a...........",
+  "......aa...aaa..........",
+  "......abaaaccaaaaaa.....",
+  "......abbbcccddddda.....",
+  "......abbcccccccda......",
+  "...aaabbccccccccddaaa...",
+  "...abbbccccccccccddda...",
+  "....abccccacacacacada...",
+  "....abcccacaaacaaadaa...",
+  "....abccccaeeeaeeeaa....",
+  "...abbccccaeaeaeaea.....",
+  "...abbbbccaeeeaeeea.....",
+  "....aaabcccaaacaaada....",
+  "....acabcccccccccada....",
+  "....aaabcccccccaadaa....",
+  "......abbbcaccccaaa.....",
+  ".......aabccaaaaa.......",
+  "........aacccccda.......",
+  ".........eccccce........",
+  ".........aeeeeeeaa......",
+  ".......aaaccccccdaa.....",
+  "......abbcffffggcdaa....",
+  ".....abbcffffffggcda...."
+ ]
+}

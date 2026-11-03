@@ -28,3 +28,8 @@ npm run build   # type-check + production build (PWA)
 Pictures are small JSON files (see `src/lib/art.ts`): a palette plus rows of characters, `.` for transparent.
 Put publishable art in `src/art/public/`. Anything in `src/art/private/` is loaded locally but git-ignored,
 so prototype art you do not own the rights to never reaches the public repo.
+
+### Fan art note
+
+`src/art/public/` includes pixel fan art of existing characters (Bart, Lisa, Maggie, Marge, Homer and a corner shop from *The Simpsons*) used as prototype pictures. These characters belong to their rights holders. This project is not affiliated with or endorsed by them, and the pictures are not licensed for a commercial release. Swap them for original art before selling or shipping the app.
+
