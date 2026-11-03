@@ -13,6 +13,7 @@ interface Props {
   onNew: () => void
   onThreshold: (n: number) => void
   onMoveSticker: (key: string, pos: Pos) => void
+  onExtend: (habitId: string) => void
 }
 
 function Card({ habit, threshold, onOpen }: { habit: Habit; threshold: number; onOpen: () => void }) {
@@ -54,7 +55,7 @@ function Card({ habit, threshold, onOpen }: { habit: Habit; threshold: number; o
   )
 }
 
-export function Home({ state, onOpen, onNew, onThreshold, onMoveSticker }: Props) {
+export function Home({ state, onOpen, onNew, onThreshold, onMoveSticker, onExtend }: Props) {
   const isDone = (h: Habit) => revealedCount(h, state.threshold) >= h.days
   const active = state.habits.filter((h) => !isDone(h))
   const anyDone = state.habits.some(isDone)
@@ -85,7 +86,7 @@ export function Home({ state, onOpen, onNew, onThreshold, onMoveSticker }: Props
         </div>
       )}
 
-      <Stickers habits={state.habits} threshold={state.threshold} positions={state.stickers} onMove={onMoveSticker} onOpenHabit={onOpen} />
+      <Stickers habits={state.habits} threshold={state.threshold} positions={state.stickers} onMove={onMoveSticker} onOpenHabit={onOpen} onExtend={onExtend} />
 
       <section className="settings">
         <label>

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react'
 import { library } from '../lib/art'
-import { collectedPictures, type Collected } from '../lib/gallery'
+import { collectedPictures, stickerLabel, type Collected } from '../lib/gallery'
 import type { Habit } from '../lib/habits'
 import { areaHeight, clampPos, defaultPos, tiltFor, type Pos } from '../lib/stickers'
 import { Sticker } from './Sticker'
@@ -12,6 +12,7 @@ interface Props {
   positions: Record<string, Pos>
   onMove: (key: string, pos: Pos) => void
   onOpenHabit: (habitId: string) => void
+  onExtend: (habitId: string) => void
 }
 
 interface Drag {
@@ -24,16 +25,16 @@ interface Drag {
 }
 
 /** Finished pictures as stickers on the page's squared paper. Drag them anywhere; tap for details. */
-export function Stickers({ habits, threshold, positions, onMove, onOpenHabit }: Props) {
+export function Stickers({ habits, threshold, positions, onMove, onOpenHabit, onExtend }: Props) {
   const collected = collectedPictures(habits, threshold)
-  const [open, setOpen] = useState<Collected | null>(null)
+  const [selected, setSelected] = useState<string | null>(null)
   const [live, setLive] = useState<Record<string, Pos>>({})
   const area = useRef<HTMLDivElement>(null)
   const drag = useRef<Drag | null>(null)
 
   const place = (c: Collected, i: number): Pos => live[c.key] ?? positions[c.key] ?? defaultPos(i, c.key)
   const all = collected.map(place)
-  const height = areaHeight(collected.length, all)
+  const height = areaHeight(collected.length, all) + (selected ? 150 : 0)
   const topZ = Math.max(0, ...Object.values(positions).map((p) => p.z ?? 0), ...Object.values(live).map((p) => p.z ?? 0))
 
   function down(e: PointerEvent<HTMLDivElement>, c: Collected, i: number) {
@@ -64,14 +65,14 @@ export function Stickers({ habits, threshold, positions, onMove, onOpenHabit }: 
       if (p) onMove(d.key, p)
       setLive(({ [d.key]: _gone, ...rest }) => rest)
     } else {
-      setOpen(c)
+      setSelected((cur) => (cur === c.key ? null : c.key))
     }
   }
 
   function key(e: KeyboardEvent<HTMLDivElement>, c: Collected) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
-      setOpen(c)
+      setSelected((cur) => (cur === c.key ? null : c.key))
     }
   }
 
@@ -87,26 +88,40 @@ export function Stickers({ habits, threshold, positions, onMove, onOpenHabit }: 
         <p className="muted empty">Finish a picture and it lands here as a sticker. You can drag it anywhere.</p>
       ) : (
         <>
-          <p className="muted">Drag the stickers around. Tap one for details.</p>
-          <div ref={area} className="sticker-area" style={{ height }}>
+          <p className="muted">Drag the stickers around. Tap one for options.</p>
+          <div ref={area} className="sticker-area" style={{ height }} onPointerDown={(e) => { if (e.target === e.currentTarget) setSelected(null) }}>
             {collected.map((c, i) => {
               const p = place(c, i)
               const dragging = live[c.key] !== undefined
+              const isSel = selected === c.key
               return (
                 <div
                   key={c.key}
-                  className={`sk ${dragging ? 'lifted' : ''}`}
-                  style={{ left: `${p.x * 100}%`, top: p.y, zIndex: p.z ?? 0, '--tilt': `${tiltFor(c.key)}deg` } as CSSProperties}
+                  className={`sk ${dragging ? 'lifted' : ''} ${isSel ? 'selected' : ''}`}
+                  style={{ left: `${p.x * 100}%`, top: p.y, zIndex: isSel ? 1000 : p.z ?? 0, '--tilt': `${tiltFor(c.key)}deg` } as CSSProperties}
                   role="button"
                   tabIndex={0}
-                  aria-label={`${c.art.name} sticker, from ${c.habitName}. Drag to move, press Enter for details.`}
+                  aria-label={`${stickerLabel(c)}. Drag to move, press Enter for options.`} aria-expanded={isSel}
                   onPointerDown={(e) => down(e, c, i)}
                   onPointerMove={move}
                   onPointerUp={(e) => up(e, c)}
                   onPointerCancel={() => { drag.current = null; setLive(({ [c.key]: _gone, ...rest }) => rest) }}
                   onKeyDown={(e) => key(e, c)}
                 >
-                  <Sticker art={c.art} compact />
+                  <Sticker art={c.art} compact label={stickerLabel(c)} />
+                  {isSel && (
+                    <div className="sk-actions" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
+                      <button className="btn small" onClick={() => { setSelected(null); onExtend(c.habitId) }}>
+                        Extend
+                      </button>
+                      <button className="btn small" onClick={() => { setSelected(null); onOpenHabit(c.habitId) }}>
+                        Open habit
+                      </button>
+                      <button className="btn small" onClick={() => setSelected(null)}>
+                        Close
+                      </button>
+                    </div>
+                  )}
                 </div>
               )
             })}
@@ -114,28 +129,6 @@ export function Stickers({ habits, threshold, positions, onMove, onOpenHabit }: 
         </>
       )}
 
-      {open && (
-        <div className="scrim celebrate" onClick={() => setOpen(null)}>
-          <div className="sheet" role="dialog" aria-label={open.art.name} onClick={(e) => e.stopPropagation()}>
-            <Sticker art={open.art} habitName={open.habitName} date={open.completedAt} board />
-            <div className="actions" style={{ justifyContent: 'center' }}>
-              <button
-                className="btn primary"
-                onClick={() => {
-                  const id = open.habitId
-                  setOpen(null)
-                  onOpenHabit(id)
-                }}
-              >
-                Open habit
-              </button>
-              <button className="btn" onClick={() => setOpen(null)}>
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   )
 }

@@ -98,7 +98,7 @@ describe('extending a habit', () => {
   })
 })
 
-import { collectedPictures, lockedPictures } from './gallery'
+import { collectedPictures, lockedPictures, stickerLabel } from './gallery'
 
 describe('gallery', () => {
   const done = (id: string, artId: string, days: number): Habit => ({
@@ -127,5 +127,14 @@ describe('gallery', () => {
     const got = collectedPictures([h], 20)
     expect(got.map((c) => c.art.id).sort()).toEqual(['heart', 'star'])
     expect(got.find((c) => c.art.id === 'star')?.completedAt).toBeDefined()
+  })
+
+  it('labels a sticker with the habit name and how long it ran', () => {
+    const daily = { ...done('Drink water', 'heart', 7), name: 'Drink water', completedAt: '2026-02-01' }
+    expect(stickerLabel(collectedPictures([daily], 20)[0])).toBe('Drink water · 7 days')
+    const weekly = { ...done('Gym', 'star', 6), name: 'Gym', schedule: { kind: 'weekly' as const, times: 3 }, completedAt: '2026-02-01' }
+    expect(stickerLabel(collectedPictures([weekly], 20)[0])).toBe('Gym · 2 weeks')
+    const one = { ...done('Once', 'cup', 1), name: 'Once', completedAt: '2026-02-01' }
+    expect(stickerLabel(collectedPictures([one], 20)[0])).toBe('Once · 1 day')
   })
 })

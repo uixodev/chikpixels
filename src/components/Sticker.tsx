@@ -17,13 +17,15 @@ interface Props {
   compact?: boolean
   /** Put the sticker on a sheet of notebook paper. */
   board?: boolean
+  /** Text on the label under the sticker. Defaults to the picture's name. */
+  label?: string
 }
 
 /**
  * A finished picture as a die-cut sticker: a white outline that follows the pixel shape and a
  * gloss that slides across only the picture. The gloss follows the pointer and drifts at rest.
  */
-export function Sticker({ art, habitName, date, compact, board }: Props) {
+export function Sticker({ art, habitName, date, compact, board, label }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const number = library.findIndex((a) => a.id === art.id) + 1
 
@@ -68,7 +70,7 @@ export function Sticker({ art, habitName, date, compact, board }: Props) {
           <PixelCanvas art={art} full bare label={art.name} />
           <div className="st-sheen" style={sheen} />
         </div>
-        <div className="st-pill">{art.name} · done</div>
+        <div className="st-pill">{label ?? `${art.name} · done`}</div>
       </div>
       {habitName && <p className="st-meta">From “{habitName}”</p>}
       {!compact && (
