@@ -52,6 +52,9 @@ function Card({ habit, threshold, onOpen }: { habit: Habit; threshold: number; o
 }
 
 export function Home({ state, onOpen, onNew, onThreshold }: Props) {
+  const isDone = (h: Habit) => revealedCount(h, state.threshold) >= h.days
+  const active = state.habits.filter((h) => !isDone(h))
+  const done = state.habits.filter(isDone)
   return (
     <main>
       <section className="callout">
@@ -67,14 +70,30 @@ export function Home({ state, onOpen, onNew, onThreshold }: Props) {
         </button>
       </div>
 
-      {state.habits.length === 0 ? (
-        <p className="muted empty">No habits yet. Start one and pick a picture, or let it be a surprise.</p>
+      {active.length === 0 ? (
+        <p className="muted empty">
+          {done.length === 0 ? 'No habits yet. Start one and pick a picture, or let it be a surprise.' : 'Nothing in progress right now. Start a new habit to collect another picture.'}
+        </p>
       ) : (
         <div className="cards">
-          {state.habits.map((h) => (
+          {active.map((h) => (
             <Card key={h.id} habit={h} threshold={state.threshold} onOpen={() => onOpen(h.id)} />
           ))}
         </div>
+      )}
+
+      {done.length > 0 && (
+        <>
+          <div className="row-between section-head">
+            <h2>Completed</h2>
+            <span className="muted">{done.length}</span>
+          </div>
+          <div className="cards">
+            {done.map((h) => (
+              <Card key={h.id} habit={h} threshold={state.threshold} onOpen={() => onOpen(h.id)} />
+            ))}
+          </div>
+        </>
       )}
 
       <section className="settings">
