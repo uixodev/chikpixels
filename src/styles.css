@@ -198,24 +198,27 @@ details .board { margin-top: 8px; }
 }
 
 /* The collection: one set per habit, stickers side by side on the squared paper */
-.sets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 12px; align-items: start; }
-.set { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.set.multi { grid-column: 1 / -1; }
-.set-head { display: flex; justify-content: space-between; align-items: baseline; gap: 2px 12px; flex-wrap: wrap; background: var(--cream); border-left: 10px solid var(--ink); padding: 8px 12px; font-size: 14px; line-height: 1.3; }
-.set-head .muted { font-size: 12px; }
-.set-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 12px; align-items: start; }
-.set:not(.multi) .set-row { grid-template-columns: minmax(0, 1fr); }
-.set-cell { position: relative; min-width: 0; }
-.set-arrow { position: absolute; left: -14px; top: 38%; width: 28px; height: 12px; color: var(--ink); z-index: 2; pointer-events: none; }
-.set-row .set-cell:nth-child(2n + 1) .set-arrow { display: none; }
-.set-item { width: 100%; min-width: 0; }
-.sk { cursor: pointer; user-select: none; -webkit-user-select: none; }
-.sk .st-wrap { padding: 0; }
-.sk .st-meta { display: none; }
-.sk .st-pill { white-space: normal; text-align: center; max-width: 100%; line-height: 1.25; }
+.sets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 12px; align-items: start; padding-top: 16px; }
+.set { --w: min(42vw, 180px); --h: calc(var(--w) * 0.7); --lab: 46px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.set.multi.open { grid-column: 1 / -1; }
+/* A stack: the first picture in front, the rest tucked behind it. Open fans them out. */
+.stack { --pad: calc((var(--n) - 1) * 10px); position: relative; width: 100%; height: calc(var(--h) + var(--pad) + 12px); cursor: pointer; transition: height 0.28s ease; }
+.stack:focus-visible { outline: 3px solid #1a73e8; outline-offset: 4px; }
+.set.multi.open .stack { height: calc(var(--rows) * (var(--h) + var(--lab))); }
+.stack-item {
+  position: absolute; width: var(--w); left: calc(50% - var(--w) / 2 + var(--i) * 16px); top: calc(var(--pad) - var(--i) * 10px);
+  z-index: calc(var(--n) - var(--i)); rotate: calc(var(--i) * 4deg);
+  transition: left 0.28s ease, top 0.28s ease, rotate 0.28s ease;
+}
+.set.multi.open .stack-item { left: calc(var(--col) * 50% + (50% - var(--w)) / 2); top: calc(var(--row) * (var(--h) + var(--lab))); rotate: 0deg; z-index: 1; }
+.stack-item .st-wrap { padding: 0; }
+.stack-item .st-meta { display: none; }
+.stack-item .st-pill { white-space: normal; text-align: center; max-width: 100%; line-height: 1.25; opacity: 0; transition: opacity 0.2s; }
+.set.multi.open .stack-item .st-pill { opacity: 1; }
+.set:not(.multi) .stack-item .st-pill { display: none; }
 .st-pill b { display: block; }
 .st-pill small { display: block; font-weight: 500; color: #555; font-size: max(9px, 3.7cqw); }
-.sk.selected .st-art { scale: 1.04; }
-.sk:focus-visible { outline: 3px solid #1a73e8; outline-offset: 4px; }
+.set-cap { align-self: center; display: flex; flex-direction: column; align-items: center; gap: 2px; background: #fff; color: #222; padding: 5px 14px; border-radius: 999px; box-shadow: 0 3px 6px rgba(40, 30, 0, 0.22); text-align: center; max-width: 100%; font-size: 13px; line-height: 1.25; }
+.set-cap small { font-weight: 500; color: #555; font-size: 11px; }
 .sk-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; padding: 6px; background: var(--paper); border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); }
 .sk-actions .btn { align-self: stretch; text-align: center; }
