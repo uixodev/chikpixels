@@ -98,7 +98,7 @@ describe('extending a habit', () => {
   })
 })
 
-import { collectedPictures, lockedPictures, stickerLabel } from './gallery'
+import { collectedPictures, groupSets, lockedPictures, stickerLabel } from './gallery'
 
 describe('gallery', () => {
   const done = (id: string, artId: string, days: number): Habit => ({
@@ -146,5 +146,14 @@ describe('gallery', () => {
     expect(got.map((c) => [c.habitName, c.part, c.parts])).toEqual([['Ext', 1, 2], ['Ext', 2, 2], ['Other', 1, 1]])
     expect(stickerLabel(got[0])).toBe('Ext · part 1 of 2 · 2 days')
     expect(stickerLabel(got[1])).toBe('Ext · part 2 of 2 · 3 days')
+  })
+
+  it('groups pictures into one set per habit with a total length', () => {
+    const other = { ...done('Other', 'cup', 2), name: 'Other', completedAt: '2026-03-01' }
+    let ext = extendHabit({ ...done('Ext', 'heart', 2), name: 'Ext', completedAt: '2026-01-05' }, { artId: 'star', days: 3, mode: 'chosen' })
+    ext = applyLog(applyLog(applyLog(ext, 2, 1, 20), 3, 1, 20), 4, 1, 20)
+    const sets = groupSets(collectedPictures([ext, other], 20))
+    expect(sets.map((x) => [x.habitName, x.items.length, x.total])).toEqual([['Ext', 2, '5 days'], ['Other', 1, '2 days']])
+    expect(groupSets(collectedPictures([{ ...done('One', 'heart', 1), name: 'One', completedAt: '2026-01-01' }], 20))[0].total).toBe('1 day')
   })
 })

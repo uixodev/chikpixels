@@ -30,16 +30,15 @@ describe('parseState', () => {
     expect(parseState('not json')).toEqual(emptyState())
     expect(parseState('{"version":2}')).toEqual(emptyState())
   })
-  it('opens data saved by older versions that lack tracking, schedule and stickers', () => {
+  it('opens data saved by older versions that lack tracking and schedule', () => {
     const old = { version: 1, threshold: 20, habits: [{ id: 'o', name: 'Old', artId: 'heart', days: 7, mode: 'chosen', createdAt: '2026-10-01' }] }
     const got = parseState(JSON.stringify(old))
-    expect(got.stickers).toEqual({})
     expect(got.habits[0].track).toEqual({ type: 'effort' })
     expect(got.habits[0].schedule).toEqual({ kind: 'daily' })
     expect(got.habits[0].efforts).toEqual({})
   })
   it('round-trips a valid state', () => {
-    const s = { ...emptyState(), habits: [habit({ 1: 80 })], stickers: { 'h:0': { x: 0.4, y: 120, z: 2 } } }
+    const s = { ...emptyState(), habits: [habit({ 1: 80 })] }
     expect(parseState(JSON.stringify(s))).toEqual(s)
   })
 })

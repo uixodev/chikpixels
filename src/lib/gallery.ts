@@ -68,3 +68,27 @@ export function stickerLabel(c: Collected): string {
   const { title, detail } = stickerLabelParts(c)
   return `${title} · ${detail}`
 }
+
+export interface CollectionSet {
+  habitId: string
+  habitName: string
+  items: Collected[]
+  /** How long the whole set took, for example "21 days". */
+  total: string
+}
+
+/** One set per habit, in the order the pictures were already sorted (most recently finished first). */
+export function groupSets(collected: Collected[]): CollectionSet[] {
+  const sets: CollectionSet[] = []
+  for (const c of collected) {
+    const last = sets[sets.length - 1]
+    if (last && last.habitId === c.habitId) last.items.push(c)
+    else sets.push({ habitId: c.habitId, habitName: c.habitName, items: [c], total: '' })
+  }
+  for (const set of sets) {
+    const n = set.items.reduce((sum, c) => sum + c.length, 0)
+    const base = set.items[0].unit.replace(/s$/, '')
+    set.total = `${n} ${base}${n === 1 ? '' : 's'}`
+  }
+  return sets
+}

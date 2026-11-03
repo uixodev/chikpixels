@@ -2,7 +2,6 @@ import { findArt } from '../lib/art'
 import { chapterRanges, chapterRevealed, revealedCount, type AppState } from '../lib/habits'
 import { PixelCanvas } from './PixelCanvas'
 import { Stickers } from './Stickers'
-import type { Pos } from '../lib/stickers'
 import { useMemo } from 'react'
 import { splitIntoRegions } from '../lib/regions'
 import type { Habit } from '../lib/habits'
@@ -11,7 +10,6 @@ interface Props {
   state: AppState
   onOpen: (id: string) => void
   onNew: () => void
-  onMoveSticker: (key: string, pos: Pos) => void
   onExtend: (habitId: string) => void
 }
 
@@ -54,7 +52,7 @@ function Card({ habit, threshold, onOpen }: { habit: Habit; threshold: number; o
   )
 }
 
-export function Home({ state, onOpen, onNew, onMoveSticker, onExtend }: Props) {
+export function Home({ state, onOpen, onNew, onExtend }: Props) {
   const isDone = (h: Habit) => revealedCount(h, state.threshold) >= h.days
   const active = state.habits.filter((h) => !isDone(h))
   const anyDone = state.habits.some(isDone)
@@ -85,7 +83,7 @@ export function Home({ state, onOpen, onNew, onMoveSticker, onExtend }: Props) {
         </div>
       )}
 
-      <Stickers habits={state.habits} threshold={state.threshold} positions={state.stickers} onMove={onMoveSticker} onOpenHabit={onOpen} onExtend={onExtend} />
+      <Stickers habits={state.habits} threshold={state.threshold} onOpenHabit={onOpen} onExtend={onExtend} />
     </main>
   )
 }

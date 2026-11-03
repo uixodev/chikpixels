@@ -38,7 +38,6 @@ export default function App() {
           onOpen={(id) => setView({ name: 'habit', id })}
           onNew={() => setView({ name: 'new' })}
           onExtend={(id) => setView({ name: 'extend', id })}
-          onMoveSticker={(key, pos) => update((s) => ({ ...s, stickers: { ...s.stickers, [key]: pos } }))}
         />
       )}
 
