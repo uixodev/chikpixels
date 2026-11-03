@@ -2,11 +2,7 @@ import { useMemo, useState } from 'react'
 import { collectedPictures, lockedPictures, type Collected } from '../lib/gallery'
 import { library } from '../lib/art'
 import type { Habit } from '../lib/habits'
-import { Holo } from './Holo'
-import { PixelCanvas } from './PixelCanvas'
-
-const pretty = (iso?: string) =>
-  iso ? new Date(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
+import { HoloCard } from './HoloCard'
 
 export function Gallery({ habits, threshold }: { habits: Habit[]; threshold: number }) {
   const [open, setOpen] = useState<Collected | null>(null)
@@ -32,11 +28,7 @@ export function Gallery({ habits, threshold }: { habits: Habit[]; threshold: num
       <div className="shelf">
         {collected.map((c) => (
           <button key={c.key} className="slot" onClick={() => setOpen(c)} aria-label={`${c.art.name}, from ${c.habitName}`}>
-            <Holo>
-              <PixelCanvas art={c.art} full />
-            </Holo>
-            <strong>{c.art.name}</strong>
-            <small className="muted">{c.habitName}</small>
+            <HoloCard art={c.art} habitName={c.habitName} date={c.completedAt} className="compact" />
           </button>
         ))}
         {locked.map((a) => (
@@ -51,13 +43,8 @@ export function Gallery({ habits, threshold }: { habits: Habit[]; threshold: num
       {open && (
         <div className="scrim celebrate" onClick={() => setOpen(null)}>
           <div className="sheet" role="dialog" aria-label={open.art.name} onClick={(e) => e.stopPropagation()}>
-            <Holo className="stage small big">
-              <PixelCanvas art={open.art} full label={open.art.name} />
-            </Holo>
-            <h2>{open.art.name}</h2>
-            <p className="muted">
-              From “{open.habitName}”{open.completedAt ? ` · finished ${pretty(open.completedAt)}` : ''}
-            </p>
+            <HoloCard art={open.art} habitName={open.habitName} date={open.completedAt} />
+            <p className="muted">Move your finger or mouse over the card.</p>
             <button className="btn primary" onClick={() => setOpen(null)}>
               Close
             </button>

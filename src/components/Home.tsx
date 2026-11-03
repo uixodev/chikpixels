@@ -1,6 +1,5 @@
 import { findArt } from '../lib/art'
 import { chapterRanges, chapterRevealed, revealedCount, type AppState } from '../lib/habits'
-import { Holo } from './Holo'
 import { PixelCanvas } from './PixelCanvas'
 import { useMemo } from 'react'
 import { splitIntoRegions } from '../lib/regions'
@@ -34,9 +33,7 @@ function Card({ habit, threshold, onOpen }: { habit: Habit; threshold: number; o
       {!art ? (
         <div className="mini missing">?</div>
       ) : complete ? (
-        <Holo className="mini">
-          <PixelCanvas art={art} full />
-        </Holo>
+        <PixelCanvas art={art} full className="mini" />
       ) : (
         <PixelCanvas art={art} brightness={pixelBrightness} className="mini" />
       )}

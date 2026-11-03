@@ -15,9 +15,11 @@ interface Props {
   ghost?: boolean
   className?: string
   label?: string
+  /** No grid paper or border, for use inside the collector card. */
+  bare?: boolean
 }
 
-export function PixelCanvas({ art, brightness, full, ghost, className, label }: Props) {
+export function PixelCanvas({ art, brightness, full, ghost, className, label, bare }: Props) {
   const ref = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export function PixelCanvas({ art, brightness, full, ghost, className, label }: 
   } as CSSProperties
 
   return (
-    <div className={`paper ${className ?? ''}`} style={style}>
+    <div className={`${bare ? 'bare' : 'paper'} ${className ?? ''}`} style={style}>
       <canvas
         ref={ref}
         width={art.width * SCALE}

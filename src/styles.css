@@ -149,41 +149,53 @@ details summary { cursor: pointer; padding: 8px 0; font-size: 14px; }
 details .board { margin-top: 8px; }
 .tile:disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* Holographic foil for finished pictures. Quiet at rest, livelier when touched. */
-.holo {
-  --mx: 50%; --my: 50%; --rx: 0deg; --ry: 0deg; --foil: 0.5;
-  position: relative; isolation: isolate; overflow: hidden; line-height: 0; width: 100%;
-  transform: perspective(700px) rotateX(var(--rx)) rotateY(var(--ry));
-  transition: transform 0.15s ease-out;
+/* Holo collector card for finished pictures */
+@property --mx { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+@property --my { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+.hc-wrap { container-type: inline-size; width: 100%; max-width: 300px; margin: 0 auto; }
+.hc-wrap.compact { max-width: none; }
+.hc {
+  --mx: 50%; --my: 50%; --rx: 0deg; --ry: 0deg; --foil: 0.4; --glare: 0.4;
+  position: relative; width: 100%; aspect-ratio: 5 / 7; line-height: 1.2;
+  transform: perspective(800px) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 0.15s ease-out; border-radius: 5cqw;
+  box-shadow: 0 1.5cqw 4cqw rgba(0, 0, 0, 0.35);
+  animation: hc-idle 7s ease-in-out infinite alternate;
 }
-.holo[data-active] { --foil: 1; }
-.holo > .paper {
-  border: 0;
-  background-image: linear-gradient(100deg, #fde6f1, #fff6d6, #e2faee, #e0f0ff, #ece2ff, #fde6f1);
-  background-size: 300% 100%;
-  animation: holo-pearl 20s linear infinite;
+.hc[data-active] { --foil: 0.7; --glare: 0.6; animation: none; }
+@keyframes hc-idle { from { --mx: 18%; --my: 22%; } to { --mx: 82%; --my: 78%; } }
+.hc-face {
+  height: 100%; padding: 3.2cqw; border-radius: inherit; display: flex; flex-direction: column; gap: 2cqw;
+  background: linear-gradient(120deg, #f6dd7a, #c9962b, #fff1a8, #b88418, #f6dd7a);
+  background-size: 320% 320%; background-position: var(--mx) var(--my);
 }
-.holo::before, .holo::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 3; transition: opacity 0.4s; }
-.holo::before {
-  opacity: var(--foil);
-  background:
-    radial-gradient(circle at var(--mx) var(--my), rgba(255, 255, 255, 0.45), transparent 40%),
-    linear-gradient(105deg, transparent 42%, rgba(255, 130, 190, 0.22) 45%, rgba(255, 230, 120, 0.26) 47.5%, rgba(255, 255, 255, 0.4) 50%, rgba(120, 235, 205, 0.26) 52.5%, rgba(130, 190, 255, 0.22) 55%, transparent 58%);
-  background-size: 100% 100%, 260% 100%;
-  background-position: 0 0, 0% 0;
-  animation: holo-shine 9s ease-in-out infinite;
+.hc-head, .hc-foot { background: #fdf6dc; padding: 1.6cqw 2.6cqw; color: #000; }
+.hc-head { display: flex; justify-content: space-between; align-items: center; font-size: max(11px, 6cqw); border-radius: 2cqw; }
+.hc-foot { display: flex; flex-direction: column; gap: 0.6cqw; font-size: max(8px, 3.4cqw); border-radius: 2cqw; margin-top: auto; }
+.hc-habit { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hc-meta { color: #5c5c5c; }
+.hc-window { position: relative; isolation: isolate; overflow: hidden; aspect-ratio: 1; border: 0.9cqw solid #7a5a12; border-radius: 1.5cqw; line-height: 0; }
+.hc-bg { position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, #3a3f8f, #181a3d 70%, #0d0e22); }
+.hc-window .bare { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto !important; }
+.hc-window canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.hc-foil, .hc-glare, .hc-sparkle { position: absolute; inset: 0; pointer-events: none; transition: opacity 0.3s; }
+.hc-foil {
+  /* rainbow light, dodged into the art so it brightens the pixels instead of covering them */
+  mix-blend-mode: color-dodge; opacity: var(--foil);
+  background: linear-gradient(115deg, #ff5fa8 0%, #ffd34f 16%, #5fffb4 32%, #4fc8ff 48%, #a77bff 64%, #ff5fa8 80%, #ffd34f 100%);
+  background-size: 300% 300%; background-position: var(--mx) var(--my);
+  filter: brightness(0.5) contrast(1.3) saturate(1.25);
 }
-.holo::after {
-  opacity: calc(var(--foil) * 0.35);
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%20shape-rendering='crispEdges'%3E%3Cg%20fill='white'%3E%3Crect%20x='14'%20y='14'%20width='1'%20height='1'/%3E%3Crect%20x='13'%20y='15'%20width='3'%20height='1'/%3E%3Crect%20x='12'%20y='16'%20width='5'%20height='1'/%3E%3Crect%20x='13'%20y='17'%20width='3'%20height='1'/%3E%3Crect%20x='14'%20y='18'%20width='1'%20height='1'/%3E%3Crect%20x='46'%20y='40'%20width='1'%20height='1'/%3E%3Crect%20x='45'%20y='41'%20width='3'%20height='1'/%3E%3Crect%20x='44'%20y='42'%20width='5'%20height='1'/%3E%3Crect%20x='45'%20y='43'%20width='3'%20height='1'/%3E%3Crect%20x='46'%20y='44'%20width='1'%20height='1'/%3E%3Crect%20x='52'%20y='9'%20width='1'%20height='1'/%3E%3Crect%20x='51'%20y='10'%20width='3'%20height='1'/%3E%3Crect%20x='52'%20y='11'%20width='1'%20height='1'/%3E%3Crect%20x='24'%20y='51'%20width='1'%20height='1'/%3E%3Crect%20x='23'%20y='52'%20width='3'%20height='1'/%3E%3Crect%20x='24'%20y='53'%20width='1'%20height='1'/%3E%3Crect%20x='6'%20y='37'%20width='1'%20height='1'/%3E%3Crect%20x='5'%20y='38'%20width='3'%20height='1'/%3E%3Crect%20x='6'%20y='39'%20width='1'%20height='1'/%3E%3Crect%20x='36'%20y='25'%20width='1'%20height='1'/%3E%3Crect%20x='35'%20y='26'%20width='3'%20height='1'/%3E%3Crect%20x='36'%20y='27'%20width='1'%20height='1'/%3E%3Crect%20x='60'%20y='55'%20width='1'%20height='1'/%3E%3Crect%20x='59'%20y='56'%20width='3'%20height='1'/%3E%3Crect%20x='60'%20y='57'%20width='1'%20height='1'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 128px 128px;
-  animation: holo-twinkle 3s ease-in-out infinite alternate;
+.hc-glare {
+  mix-blend-mode: overlay; opacity: var(--glare);
+  background: radial-gradient(farthest-corner circle at var(--mx) var(--my), rgba(255, 255, 255, 0.85) 6%, rgba(255, 255, 255, 0.3) 28%, rgba(0, 0, 0, 0.55) 95%);
 }
-.holo.mini { width: 72px; flex: none; }
-.holo.mini::after { background-size: 64px 64px; }
-@keyframes holo-pearl { to { background-position: 150% 0; } }
-@keyframes holo-shine { 0%, 40% { background-position: 0 0, 0% 0; } 85%, 100% { background-position: 0 0, 100% 0; } }
-@keyframes holo-twinkle { from { transform: translateY(0); } to { transform: translateY(-4px); } }
+.hc-sparkle {
+  opacity: 0.55; background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%20shape-rendering='crispEdges'%3E%3Cg%20fill='white'%3E%3Crect%20x='14'%20y='14'%20width='1'%20height='1'/%3E%3Crect%20x='13'%20y='15'%20width='3'%20height='1'/%3E%3Crect%20x='12'%20y='16'%20width='5'%20height='1'/%3E%3Crect%20x='13'%20y='17'%20width='3'%20height='1'/%3E%3Crect%20x='14'%20y='18'%20width='1'%20height='1'/%3E%3Crect%20x='46'%20y='40'%20width='1'%20height='1'/%3E%3Crect%20x='45'%20y='41'%20width='3'%20height='1'/%3E%3Crect%20x='44'%20y='42'%20width='5'%20height='1'/%3E%3Crect%20x='45'%20y='43'%20width='3'%20height='1'/%3E%3Crect%20x='46'%20y='44'%20width='1'%20height='1'/%3E%3Crect%20x='52'%20y='9'%20width='1'%20height='1'/%3E%3Crect%20x='51'%20y='10'%20width='3'%20height='1'/%3E%3Crect%20x='52'%20y='11'%20width='1'%20height='1'/%3E%3Crect%20x='24'%20y='51'%20width='1'%20height='1'/%3E%3Crect%20x='23'%20y='52'%20width='3'%20height='1'/%3E%3Crect%20x='24'%20y='53'%20width='1'%20height='1'/%3E%3Crect%20x='6'%20y='37'%20width='1'%20height='1'/%3E%3Crect%20x='5'%20y='38'%20width='3'%20height='1'/%3E%3Crect%20x='6'%20y='39'%20width='1'%20height='1'/%3E%3Crect%20x='36'%20y='25'%20width='1'%20height='1'/%3E%3Crect%20x='35'%20y='26'%20width='3'%20height='1'/%3E%3Crect%20x='36'%20y='27'%20width='1'%20height='1'/%3E%3Crect%20x='60'%20y='55'%20width='1'%20height='1'/%3E%3Crect%20x='59'%20y='56'%20width='3'%20height='1'/%3E%3Crect%20x='60'%20y='57'%20width='1'%20height='1'/%3E%3C/g%3E%3C/svg%3E"); background-size: 28cqw 28cqw;
+  background-position: calc(var(--mx) * -0.3) calc(var(--my) * -0.3);
+  animation: hc-twinkle 2.2s ease-in-out infinite alternate;
+}
+@keyframes hc-twinkle { from { opacity: 0.2; } to { opacity: 0.8; } }
 
 /* Finished habit card: a soft rainbow edge, no motion */
 .card.complete {
@@ -199,11 +211,10 @@ details .board { margin-top: 8px; }
 .tab.on { background: var(--ink); color: var(--paper); }
 .shelf { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 .slot { font: inherit; color: inherit; background: var(--paper); border: 2px solid var(--ink); padding: 8px; display: flex; flex-direction: column; gap: 4px; text-align: center; cursor: pointer; border-radius: 0; box-shadow: 3px 3px 0 var(--ink); }
-.slot .holo { margin-bottom: 4px; }
 .slot.locked { cursor: default; box-shadow: none; border-style: dashed; opacity: 0.6; }
 .slot .blank { aspect-ratio: 1; display: grid; place-items: center; font-size: 32px; background: repeating-linear-gradient(45deg, #fff, #fff 6px, #f1f1f1 6px, #f1f1f1 12px); }
-.stage.big { max-width: 300px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .holo, .holo::before, .holo::after, .holo > .paper { animation: none; transition: none; transform: none; }
+  .hc { animation: none; transition: none; transform: none; --mx: 38%; --my: 30%; }
+  .hc-sparkle { animation: none; }
 }
