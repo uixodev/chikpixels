@@ -1,6 +1,6 @@
 {
   "id": "cup", "name": "Coffee Cup", "theme": "cozy", "width": 14, "height": 14,
-  "background": "#f3e3c7", "palette": { "a": "#3b2a26", "b": "#f6f1e7", "c": "#8a5a44", "d": "#c9c2b4", "e": "#d9d9d9" },
+  "palette": { "a": "#3b2a26", "b": "#f6f1e7", "c": "#8a5a44", "d": "#c9c2b4", "e": "#d9d9d9" },
   "rows": [
     "...e....e.....",
     "....e....e....",

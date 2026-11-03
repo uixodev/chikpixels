@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
-import { buildMosaic, detailOptions, library, themeLabels, type Art, type Detail, type Theme } from '../lib/art'
-import { newId, type Habit, type Mode } from '../lib/habits'
-import { MosaicBoard } from './MosaicBoard'
+import { library, themeLabels, type Art, type Theme } from '../lib/art'
+import { LENGTH_PRESETS, newId, type Habit, type Mode } from '../lib/habits'
 import { PixelCanvas } from './PixelCanvas'
 
 interface Props {
@@ -10,17 +9,11 @@ interface Props {
   onCancel: () => void
 }
 
-const TARGET = 30
-const closest = <T,>(items: T[], value: (t: T) => number): T | undefined =>
-  [...items].sort((a, b) => Math.abs(value(a) - TARGET) - Math.abs(value(b) - TARGET))[0]
-
-/** Every habit length the library can make, with the pictures that offer it. */
-function secretChoices(): Map<number, { art: Art; detail: Detail }[]> {
-  const map = new Map<number, { art: Art; detail: Detail }[]>()
-  for (const art of library) {
-    for (const detail of detailOptions(art)) map.set(detail.days, [...(map.get(detail.days) ?? []), { art, detail }])
-  }
-  return map
+function pickSurprise(days: number, habits: Habit[]): Art | undefined {
+  const fits = library.filter((a) => a.pixels.length >= days)
+  const unseen = fits.filter((a) => !habits.some((h) => h.artId === a.id))
+  const pool = unseen.length > 0 ? unseen : fits
+  return pool[Math.floor(Math.random() * pool.length)]
 }
 
 export function NewHabit({ habits, onCreate, onCancel }: Props) {
@@ -28,49 +21,24 @@ export function NewHabit({ habits, onCreate, onCancel }: Props) {
   const [mode, setMode] = useState<Mode>('chosen')
   const [artId, setArtId] = useState<string | null>(null)
   const [theme, setTheme] = useState<Theme | 'all'>('all')
-  const [k, setK] = useState<number | null>(null)
-
-  const choices = useMemo(secretChoices, [])
-  const secretLengths = useMemo(() => [...choices.keys()].sort((a, b) => a - b), [choices])
-  const [secretDays, setSecretDays] = useState<number>(() => closest(secretLengths, (n) => n) ?? 36)
+  const [days, setDays] = useState(30)
 
   const art = library.find((a) => a.id === artId)
-  const options = useMemo(() => (art ? detailOptions(art) : []), [art])
-  const detail = options.find((o) => o.k === k)
+  const maxDays = mode === 'chosen' && art ? art.pixels.length : Math.max(...library.map((a) => a.pixels.length))
   const themes = useMemo(() => Array.from(new Set(library.map((a) => a.theme))), [])
   const shown = theme === 'all' ? library : library.filter((a) => a.theme === theme)
 
-  const previewMosaic = useMemo(() => (art && detail ? buildMosaic(art, detail.k) : undefined), [art, detail])
-  const previewEfforts = useMemo(() => {
-    const e: Record<number, number> = {}
-    if (previewMosaic) previewMosaic.colors.forEach((_, i) => (e[i] = 100))
-    return e
-  }, [previewMosaic])
-
-  const ready = name.trim().length > 0 && (mode === 'secret' || detail !== undefined)
-
-  function pickArt(a: Art) {
-    setArtId(a.id)
-    setK(closest(detailOptions(a), (o) => o.days)?.k ?? null)
-  }
+  const effectiveDays = Math.min(days, maxDays)
+  const ready = name.trim().length > 0 && effectiveDays >= 1 && (mode === 'secret' || art !== undefined)
 
   function start() {
-    let chosen: { art: Art; detail: Detail } | undefined
-    if (mode === 'chosen' && art && detail) {
-      chosen = { art, detail }
-    } else if (mode === 'secret') {
-      const pool = choices.get(secretDays) ?? []
-      const unseen = pool.filter((c) => !habits.some((h) => h.artId === c.art.id))
-      const from = unseen.length > 0 ? unseen : pool
-      chosen = from[Math.floor(Math.random() * from.length)]
-    }
+    const chosen = mode === 'chosen' ? art : pickSurprise(effectiveDays, habits)
     if (!chosen) return
     onCreate({
       id: newId(),
       name: name.trim(),
-      artId: chosen.art.id,
-      days: chosen.detail.days,
-      cell: chosen.detail.k,
+      artId: chosen.id,
+      days: effectiveDays,
       mode,
       efforts: {},
       createdAt: new Date().toLocaleDateString('en-CA'),
@@ -101,7 +69,7 @@ export function NewHabit({ habits, onCreate, onCancel }: Props) {
         </div>
         {mode === 'secret' && (
           <p className="callout small">
-            <span>A secret picture is chosen for you. You will not see it, or even its name, until the last square is filled.</span>
+            <span>A secret picture is chosen for you. You will not see it, or even its name, until the last piece appears.</span>
           </p>
         )}
       </fieldset>
@@ -120,9 +88,10 @@ export function NewHabit({ habits, onCreate, onCancel }: Props) {
           </div>
           <div className="gallery">
             {shown.map((a) => (
-              <button key={a.id} className={`tile ${artId === a.id ? 'on' : ''}`} onClick={() => pickArt(a)} aria-pressed={artId === a.id}>
+              <button key={a.id} className={`tile ${artId === a.id ? 'on' : ''}`} onClick={() => setArtId(a.id)} aria-pressed={artId === a.id}>
                 <PixelCanvas art={a} full className="thumb" label={a.name} />
                 <span>{a.name}</span>
+                <small className="muted">{a.pixels.length} px</small>
               </button>
             ))}
           </div>
@@ -131,36 +100,23 @@ export function NewHabit({ habits, onCreate, onCancel }: Props) {
 
       <fieldset className="field">
         <legend>How many days?</legend>
-        {mode === 'chosen' && !art && <p className="muted">Pick a picture first. Its length is how many squares it is made of.</p>}
-        {mode === 'chosen' && art && (
-          <>
-            <div className="chips">
-              {options.map((o) => (
-                <button key={o.k} className={`chip ${k === o.k ? 'on' : ''}`} onClick={() => setK(o.k)}>
-                  {o.days} days <small>{o.cols}×{o.rows}</small>
-                </button>
-              ))}
-            </div>
-            <p className="muted">Each day is one square of the picture. More days, more detail.</p>
-            {previewMosaic && (
-              <div className="preview">
-                <MosaicBoard mosaic={previewMosaic} efforts={previewEfforts} threshold={20} compact label={`Preview of ${art.name}`} />
-              </div>
-            )}
-          </>
-        )}
-        {mode === 'secret' && (
-          <>
-            <div className="chips">
-              {secretLengths.map((n) => (
-                <button key={n} className={`chip ${secretDays === n ? 'on' : ''}`} onClick={() => setSecretDays(n)}>
-                  {n} days
-                </button>
-              ))}
-            </div>
-            <p className="muted">Longer habits make a more detailed secret picture.</p>
-          </>
-        )}
+        <div className="chips">
+          {LENGTH_PRESETS.map((n) => (
+            <button key={n} className={`chip ${days === n ? 'on' : ''}`} disabled={n > maxDays} onClick={() => setDays(n)}>
+              {n}
+            </button>
+          ))}
+          <input
+            className="num"
+            type="number"
+            min={1}
+            max={maxDays}
+            value={days}
+            onChange={(e) => setDays(Math.max(1, Math.min(maxDays, Math.round(+e.target.value) || 1)))}
+            aria-label="Custom number of days"
+          />
+        </div>
+        {mode === 'chosen' && art && effectiveDays < days && <p className="muted">This picture has {art.pixels.length} pixels, so {effectiveDays} days is the most.</p>}
       </fieldset>
 
       <button className="btn primary wide" disabled={!ready} onClick={start}>

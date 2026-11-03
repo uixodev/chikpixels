@@ -4,10 +4,7 @@ export interface Habit {
   id: string
   name: string
   artId: string
-  /** Number of day squares (columns x rows of the mosaic). */
   days: number
-  /** Mosaic block size: how many art pixels make up one day square. */
-  cell: number
   mode: Mode
   /** Effort (0-100) per day slot. A slot with no entry has not been logged. */
   efforts: Record<number, number>
@@ -24,6 +21,7 @@ export interface AppState {
 
 export const DEFAULT_THRESHOLD = 20
 export const STORAGE_KEY = 'chikpixels:v1'
+export const LENGTH_PRESETS = [7, 14, 21, 30, 66, 100]
 
 export function emptyState(): AppState {
   return { version: 1, threshold: DEFAULT_THRESHOLD, habits: [] }
@@ -34,7 +32,7 @@ export function parseState(raw: string | null): AppState {
   try {
     const data = JSON.parse(raw)
     if (data && data.version === 1 && Array.isArray(data.habits) && typeof data.threshold === 'number') {
-      return { ...data, habits: data.habits.filter((h: Habit) => typeof h.cell === 'number') } as AppState
+      return data as AppState
     }
   } catch {
     /* fall through to a fresh state */
