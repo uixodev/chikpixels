@@ -3,7 +3,6 @@ import { findArt, type Art } from '../lib/art'
 import { brightness, chapterRanges, chapterRevealed, isRevealed, revealedCount, todayISO, type ChapterRange, type Habit } from '../lib/habits'
 import { splitIntoRegions } from '../lib/regions'
 import { describeSchedule, slotInfo } from '../lib/schedule'
-import { ArrowLeft } from './ArrowLeft'
 import { Confetti } from './Confetti'
 import { Sticker } from './Sticker'
 import { LogSheet } from './LogSheet'
@@ -14,7 +13,6 @@ interface Props {
   threshold: number
   onLog: (day: number, value: number | null) => void
   onDelete: () => void
-  onBack: () => void
   onExtend: () => void
 }
 
@@ -114,7 +112,7 @@ function ChapterView({ habit, range, art, total, threshold, today, complete, col
   )
 }
 
-export function Tracker({ habit, threshold, onLog, onDelete, onBack, onExtend }: Props) {
+export function Tracker({ habit, threshold, onLog, onDelete, onExtend }: Props) {
   const [editing, setEditing] = useState<number | null>(null)
   const [celebrate, setCelebrate] = useState<number | null>(null)
   const today = todayISO()
@@ -139,9 +137,6 @@ export function Tracker({ habit, threshold, onLog, onDelete, onBack, onExtend }:
 
   return (
     <main>
-      <button className="btn ghost back" onClick={onBack}>
-        <ArrowLeft /> My habits
-      </button>
       <div className="row-between">
         <h1>{habit.name}</h1>
         <span className="count">

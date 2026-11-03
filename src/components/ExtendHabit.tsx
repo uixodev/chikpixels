@@ -2,19 +2,17 @@ import { useState } from 'react'
 import { library, type Art } from '../lib/art'
 import { chaptersOf, extendHabit, type Habit, type Mode } from '../lib/habits'
 import { describeSchedule, LENGTH_PRESETS, slotsPerUnit, unitName } from '../lib/schedule'
-import { ArrowLeft } from './ArrowLeft'
 import { ArtPicker } from './ArtPicker'
 
 interface Props {
   habit: Habit
   habits: Habit[]
-  onCancel: () => void
   onExtend: (habit: Habit) => void
 }
 
 const toInt = (v: string, min: number, max: number) => Math.min(max, Math.max(min, Math.round(+v) || min))
 
-export function ExtendHabit({ habit, habits, onCancel, onExtend }: Props) {
+export function ExtendHabit({ habit, habits, onExtend }: Props) {
   const [mode, setMode] = useState<Mode>('chosen')
   const [artId, setArtId] = useState<string | null>(null)
   const [units, setUnits] = useState(LENGTH_PRESETS[habit.schedule.kind][1])
@@ -43,9 +41,6 @@ export function ExtendHabit({ habit, habits, onCancel, onExtend }: Props) {
 
   return (
     <main>
-      <button className="btn ghost back" onClick={onCancel}>
-        <ArrowLeft /> Back
-      </button>
       <h1>Extend “{habit.name}”</h1>
       <p className="callout small">
         <span>

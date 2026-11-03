@@ -2,13 +2,11 @@ import { useState } from 'react'
 import { library, type Art } from '../lib/art'
 import { newId, todayISO, type Habit, type Mode, type Schedule, type Track } from '../lib/habits'
 import { LENGTH_PRESETS, slotsPerUnit, unitName } from '../lib/schedule'
-import { ArrowLeft } from './ArrowLeft'
 import { ArtPicker } from './ArtPicker'
 
 interface Props {
   habits: Habit[]
   onCreate: (habit: Habit) => void
-  onCancel: () => void
 }
 
 type TrackKind = Track['type']
@@ -16,7 +14,7 @@ type ScheduleKind = Schedule['kind']
 
 const toInt = (v: string, min: number, max: number) => Math.min(max, Math.max(min, Math.round(+v) || min))
 
-export function NewHabit({ habits, onCreate, onCancel }: Props) {
+export function NewHabit({ habits, onCreate }: Props) {
   const [name, setName] = useState('')
   const [mode, setMode] = useState<Mode>('chosen')
   const [artId, setArtId] = useState<string | null>(null)
@@ -70,9 +68,6 @@ export function NewHabit({ habits, onCreate, onCancel }: Props) {
 
   return (
     <main>
-      <button className="btn ghost back" onClick={onCancel}>
-        <ArrowLeft /> Back
-      </button>
       <h1>New habit</h1>
 
       <label className="field">

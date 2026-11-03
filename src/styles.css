@@ -23,7 +23,13 @@ body {
 }
 
 .app { max-width: 560px; margin: 0 auto; padding: 0 16px 48px; }
-header { padding: 16px 0 8px; }
+/* Top bar: sticky, solid, with a back button on inner pages */
+.topbar {
+  position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 12px;
+  margin: 0 -16px 16px; padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px;
+  background: var(--paper); border-bottom: 2px solid var(--ink);
+}
+.back-btn { min-height: 40px; width: 40px; padding: 0; display: grid; place-items: center; flex: none; }
 main { display: flex; flex-direction: column; gap: 16px; }
 
 h1 { font-size: 22px; margin: 0; line-height: 1.2; }
@@ -34,7 +40,8 @@ p { margin: 0; line-height: 1.5; }
 .row-between { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
 .logo-btn { background: none; border: 0; padding: 0; color: inherit; cursor: pointer; }
-.wordmark { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 26px; letter-spacing: 0.02em; background: var(--paper); padding: 2px 8px 2px 4px; }
+.wordmark { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 20px; letter-spacing: 0.02em; }
+.wordmark svg { width: 28px; height: 28px; }
 
 /* Buttons */
 .btn {
@@ -46,7 +53,6 @@ p { margin: 0; line-height: 1.5; }
 .btn.primary, .btn.on { background: var(--ink); color: var(--paper); }
 .btn.small { min-height: 36px; padding: 6px 12px; font-size: 14px; align-self: flex-start; }
 .btn.ghost { border-color: transparent; box-shadow: none; background: transparent; }
-.btn.ghost.back { align-self: flex-start; padding-left: 0; display: inline-flex; align-items: center; gap: 10px; }
 .btn.danger { color: var(--warn); align-self: flex-start; }
 .btn.wide { width: 100%; }
 .btn:disabled { opacity: 0.35; cursor: not-allowed; }

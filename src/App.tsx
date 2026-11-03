@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ArrowLeft } from './components/ArrowLeft'
 import { ExtendHabit } from './components/ExtendHabit'
 import { Home } from './components/Home'
 import { Wordmark } from './components/Logo'
@@ -15,11 +16,17 @@ export default function App() {
   useEffect(() => saveState(state), [state])
 
   const update = (fn: (s: AppState) => AppState) => setState(fn)
+  const goBack = () => setView(view.name === 'extend' ? { name: 'habit', id: view.id } : { name: 'home' })
   const habit = view.name === 'habit' || view.name === 'extend' ? state.habits.find((h) => h.id === view.id) : undefined
 
   return (
     <div className="app">
-      <header>
+      <header className="topbar">
+        {view.name !== 'home' && (
+          <button className="btn back-btn" onClick={goBack} aria-label="Back">
+            <ArrowLeft size={20} />
+          </button>
+        )}
         <button className="logo-btn" onClick={() => setView({ name: 'home' })} aria-label="chikpixels home">
           <Wordmark />
         </button>
@@ -38,7 +45,6 @@ export default function App() {
       {view.name === 'new' && (
         <NewHabit
           habits={state.habits}
-          onCancel={() => setView({ name: 'home' })}
           onCreate={(h) => {
             update((s) => ({ ...s, habits: [...s.habits, h] }))
             setView({ name: 'habit', id: h.id })
@@ -50,7 +56,6 @@ export default function App() {
         <ExtendHabit
           habit={habit}
           habits={state.habits}
-          onCancel={() => setView({ name: 'habit', id: habit.id })}
           onExtend={(next) => {
             update((s) => ({ ...s, habits: s.habits.map((h) => (h.id === next.id ? next : h)) }))
             setView({ name: 'habit', id: next.id })
@@ -63,7 +68,6 @@ export default function App() {
           habit={habit}
           onExtend={() => setView({ name: 'extend', id: habit.id })}
           threshold={state.threshold}
-          onBack={() => setView({ name: 'home' })}
           onLog={(day, value) =>
             update((s) => ({ ...s, habits: s.habits.map((h) => (h.id === habit.id ? applyLog(h, day, value, s.threshold) : h)) }))
           }
