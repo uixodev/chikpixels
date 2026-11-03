@@ -10,7 +10,7 @@ A habit tracker where showing up reveals a pixel-art picture, one piece at a tim
 - **Effort sets how vivid it is.** A piece only appears at or above the threshold (default 20); more effort means brighter colour.
 - **Choose or be surprised.** Pick a picture and peek at its outline, or let the app choose a secret one that is only named when you finish.
 - **Extend a habit.** Keep going after (or before) finishing: extending adds a new picture after the current one, with the same pace. Nothing you've revealed changes.
-- **Holo collector cards.** A finished picture becomes a gold-framed collector card with its number and finish date. A rainbow foil and glare shift across the art as you move over it, and drift on their own at rest (reduced-motion users get it still).
+- **Die-cut stickers.** A finished picture becomes a sticker: a white outline that follows the pixel shape, a soft shadow, a "done" label, and a gloss that slides across only the picture (it follows your pointer and drifts at rest; reduced-motion users get it still).
 - **Gallery.** Every finished picture is collected in a Gallery tab (newest first) with the date you finished it, plus locked slots for pictures you haven't earned yet.
 - Data lives in your browser (`localStorage`). No accounts yet.
 

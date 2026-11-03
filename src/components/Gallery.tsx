@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { collectedPictures, lockedPictures, type Collected } from '../lib/gallery'
 import { library } from '../lib/art'
 import type { Habit } from '../lib/habits'
-import { HoloCard } from './HoloCard'
+import { Sticker } from './Sticker'
 
 export function Gallery({ habits, threshold }: { habits: Habit[]; threshold: number }) {
   const [open, setOpen] = useState<Collected | null>(null)
@@ -28,7 +28,7 @@ export function Gallery({ habits, threshold }: { habits: Habit[]; threshold: num
       <div className="shelf">
         {collected.map((c) => (
           <button key={c.key} className="slot" onClick={() => setOpen(c)} aria-label={`${c.art.name}, from ${c.habitName}`}>
-            <HoloCard art={c.art} habitName={c.habitName} date={c.completedAt} className="compact" />
+            <Sticker art={c.art} habitName={c.habitName} date={c.completedAt} compact />
           </button>
         ))}
         {locked.map((a) => (
@@ -43,8 +43,8 @@ export function Gallery({ habits, threshold }: { habits: Habit[]; threshold: num
       {open && (
         <div className="scrim celebrate" onClick={() => setOpen(null)}>
           <div className="sheet" role="dialog" aria-label={open.art.name} onClick={(e) => e.stopPropagation()}>
-            <HoloCard art={open.art} habitName={open.habitName} date={open.completedAt} />
-            <p className="muted">Move your finger or mouse over the card.</p>
+            <Sticker art={open.art} habitName={open.habitName} date={open.completedAt} board />
+            <p className="muted">Move your finger or mouse over the sticker.</p>
             <button className="btn primary" onClick={() => setOpen(null)}>
               Close
             </button>

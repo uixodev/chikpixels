@@ -149,61 +149,42 @@ details summary { cursor: pointer; padding: 8px 0; font-size: 14px; }
 details .board { margin-top: 8px; }
 .tile:disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* Holo collector card for finished pictures */
+/* Finished pictures are die-cut stickers: a white outline that follows the pixels and a gloss
+   that slides across only the picture. */
 @property --mx { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
 @property --my { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
-.hc-wrap { container-type: inline-size; width: 100%; max-width: 300px; margin: 0 auto; }
-.hc-wrap.compact { max-width: none; }
-.hc {
-  --mx: 50%; --my: 50%; --rx: 0deg; --ry: 0deg; --foil: 0.4; --glare: 0.4;
-  position: relative; width: 100%; aspect-ratio: 5 / 7; line-height: 1.2;
-  transform: perspective(800px) rotateX(var(--rx)) rotateY(var(--ry));
-  transition: transform 0.15s ease-out; border-radius: 5cqw;
-  box-shadow: 0 1.5cqw 4cqw rgba(0, 0, 0, 0.35);
-  animation: hc-idle 7s ease-in-out infinite alternate;
+.st-wrap { container-type: inline-size; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.st-wrap.board {
+  max-width: 340px; margin: 0 auto; padding: 8cqw 6cqw 6cqw; border: 2px solid var(--ink);
+  background-color: #fbf7ea; background-image: linear-gradient(#e4dcc3 1px, transparent 1px), linear-gradient(90deg, #e4dcc3 1px, transparent 1px); background-size: 24px 24px;
 }
-.hc[data-active] { --foil: 0.7; --glare: 0.6; animation: none; }
-@keyframes hc-idle { from { --mx: 18%; --my: 22%; } to { --mx: 82%; --my: 78%; } }
-.hc-face {
-  height: 100%; padding: 3.2cqw; border-radius: inherit; display: flex; flex-direction: column; gap: 2cqw;
-  background: linear-gradient(120deg, #f6dd7a, #c9962b, #fff1a8, #b88418, #f6dd7a);
-  background-size: 320% 320%; background-position: var(--mx) var(--my);
+.st {
+  --mx: 50%; --my: 50%; --rx: 0deg; --ry: 0deg;
+  width: 100%; display: flex; flex-direction: column; align-items: center; gap: 4cqw; padding: 3cqw 0;
+  rotate: -4deg; transform: perspective(800px) rotateX(var(--rx)) rotateY(var(--ry)); transition: transform 0.14s ease-out;
+  animation: st-idle 7s ease-in-out infinite alternate;
 }
-.hc-head, .hc-foot { background: #fdf6dc; padding: 1.6cqw 2.6cqw; color: #000; }
-.hc-head { display: flex; justify-content: space-between; align-items: center; font-size: max(11px, 6cqw); border-radius: 2cqw; }
-.hc-foot { display: flex; flex-direction: column; gap: 0.6cqw; font-size: max(8px, 3.4cqw); border-radius: 2cqw; margin-top: auto; }
-.hc-habit { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hc-meta { color: #5c5c5c; }
-.hc-window { position: relative; isolation: isolate; overflow: hidden; aspect-ratio: 1; border: 0.9cqw solid #7a5a12; border-radius: 1.5cqw; line-height: 0; }
-.hc-bg { position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, #3a3f8f, #181a3d 70%, #0d0e22); }
-.hc-window .bare { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto !important; }
-.hc-window canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
-.hc-foil, .hc-glare, .hc-sparkle { position: absolute; inset: 0; pointer-events: none; transition: opacity 0.3s; }
-.hc-foil {
-  /* rainbow light, dodged into the art so it brightens the pixels instead of covering them */
-  mix-blend-mode: color-dodge; opacity: var(--foil);
-  background: linear-gradient(115deg, #ff5fa8 0%, #ffd34f 16%, #5fffb4 32%, #4fc8ff 48%, #a77bff 64%, #ff5fa8 80%, #ffd34f 100%);
-  background-size: 300% 300%; background-position: var(--mx) var(--my);
-  filter: brightness(0.5) contrast(1.3) saturate(1.25);
+.st[data-active] { animation: none; }
+@keyframes st-idle { from { --mx: 15%; --my: 25%; } to { --mx: 85%; --my: 75%; } }
+.st-art {
+  position: relative; width: 66cqw; line-height: 0;
+  filter: drop-shadow(1.6cqw 0 0 #fff) drop-shadow(-1.6cqw 0 0 #fff) drop-shadow(0 1.6cqw 0 #fff) drop-shadow(0 -1.6cqw 0 #fff) drop-shadow(0 3cqw 2.4cqw rgba(40, 30, 0, 0.35));
 }
-.hc-glare {
-  mix-blend-mode: overlay; opacity: var(--glare);
-  background: radial-gradient(farthest-corner circle at var(--mx) var(--my), rgba(255, 255, 255, 0.85) 6%, rgba(255, 255, 255, 0.3) 28%, rgba(0, 0, 0, 0.55) 95%);
+.st-art .bare { width: 100%; }
+.st-sheen {
+  position: absolute; inset: 0; pointer-events: none; -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0) 65%);
+  background-size: 280% 100%; background-position: var(--mx) 0;
 }
-.hc-sparkle {
-  opacity: 0.55; background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%20shape-rendering='crispEdges'%3E%3Cg%20fill='white'%3E%3Crect%20x='14'%20y='14'%20width='1'%20height='1'/%3E%3Crect%20x='13'%20y='15'%20width='3'%20height='1'/%3E%3Crect%20x='12'%20y='16'%20width='5'%20height='1'/%3E%3Crect%20x='13'%20y='17'%20width='3'%20height='1'/%3E%3Crect%20x='14'%20y='18'%20width='1'%20height='1'/%3E%3Crect%20x='46'%20y='40'%20width='1'%20height='1'/%3E%3Crect%20x='45'%20y='41'%20width='3'%20height='1'/%3E%3Crect%20x='44'%20y='42'%20width='5'%20height='1'/%3E%3Crect%20x='45'%20y='43'%20width='3'%20height='1'/%3E%3Crect%20x='46'%20y='44'%20width='1'%20height='1'/%3E%3Crect%20x='52'%20y='9'%20width='1'%20height='1'/%3E%3Crect%20x='51'%20y='10'%20width='3'%20height='1'/%3E%3Crect%20x='52'%20y='11'%20width='1'%20height='1'/%3E%3Crect%20x='24'%20y='51'%20width='1'%20height='1'/%3E%3Crect%20x='23'%20y='52'%20width='3'%20height='1'/%3E%3Crect%20x='24'%20y='53'%20width='1'%20height='1'/%3E%3Crect%20x='6'%20y='37'%20width='1'%20height='1'/%3E%3Crect%20x='5'%20y='38'%20width='3'%20height='1'/%3E%3Crect%20x='6'%20y='39'%20width='1'%20height='1'/%3E%3Crect%20x='36'%20y='25'%20width='1'%20height='1'/%3E%3Crect%20x='35'%20y='26'%20width='3'%20height='1'/%3E%3Crect%20x='36'%20y='27'%20width='1'%20height='1'/%3E%3Crect%20x='60'%20y='55'%20width='1'%20height='1'/%3E%3Crect%20x='59'%20y='56'%20width='3'%20height='1'/%3E%3Crect%20x='60'%20y='57'%20width='1'%20height='1'/%3E%3C/g%3E%3C/svg%3E"); background-size: 28cqw 28cqw;
-  background-position: calc(var(--mx) * -0.3) calc(var(--my) * -0.3);
-  animation: hc-twinkle 2.2s ease-in-out infinite alternate;
-}
-@keyframes hc-twinkle { from { opacity: 0.2; } to { opacity: 0.8; } }
+.st-pill { background: #fff; color: #222; padding: 1.6cqw 4.5cqw; border-radius: 999px; font-size: max(10px, 4.4cqw); font-weight: 700; box-shadow: 0 1.4cqw 2cqw rgba(40, 30, 0, 0.25); rotate: 3deg; white-space: nowrap; }
+.st-meta { margin: 0; font-size: max(10px, 3.8cqw); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-wrap.compact .st-art { width: 60cqw; }
+.bare { line-height: 0; }
+.bare canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
 
 /* Finished habit card: a soft rainbow edge, no motion */
-.card.complete {
-  border-color: transparent;
-  background:
-    linear-gradient(#fff, #fff) padding-box,
-    linear-gradient(90deg, #f4a3c8, #f5dc8a, #9fe8c4, #9ccdf5, #c8b0f5) border-box;
-}
+/* Finished habit card: cream, like the sticker sheet */
+.card.complete { background: var(--cream); }
 
 /* Tabs and gallery */
 .tabs { display: flex; gap: 8px; margin: 4px 0 16px; }
@@ -211,10 +192,10 @@ details .board { margin-top: 8px; }
 .tab.on { background: var(--ink); color: var(--paper); }
 .shelf { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 .slot { font: inherit; color: inherit; background: var(--paper); border: 2px solid var(--ink); padding: 8px; display: flex; flex-direction: column; gap: 4px; text-align: center; cursor: pointer; border-radius: 0; box-shadow: 3px 3px 0 var(--ink); }
+.slot:not(.locked) { background-color: #fbf7ea; background-image: linear-gradient(#e4dcc3 1px, transparent 1px), linear-gradient(90deg, #e4dcc3 1px, transparent 1px); background-size: 20px 20px; }
 .slot.locked { cursor: default; box-shadow: none; border-style: dashed; opacity: 0.6; }
 .slot .blank { aspect-ratio: 1; display: grid; place-items: center; font-size: 32px; background: repeating-linear-gradient(45deg, #fff, #fff 6px, #f1f1f1 6px, #f1f1f1 12px); }
 
 @media (prefers-reduced-motion: reduce) {
-  .hc { animation: none; transition: none; transform: none; --mx: 38%; --my: 30%; }
-  .hc-sparkle { animation: none; }
+  .st { animation: none; transition: none; transform: none; --mx: 38%; --my: 30%; }
 }

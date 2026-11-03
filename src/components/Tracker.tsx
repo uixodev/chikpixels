@@ -5,7 +5,7 @@ import { splitIntoRegions } from '../lib/regions'
 import { describeSchedule, slotInfo } from '../lib/schedule'
 import { ArrowLeft } from './ArrowLeft'
 import { Confetti } from './Confetti'
-import { HoloCard } from './HoloCard'
+import { Sticker } from './Sticker'
 import { LogSheet } from './LogSheet'
 import { PixelCanvas } from './PixelCanvas'
 
@@ -93,7 +93,7 @@ function ChapterView({ habit, range, art, total, threshold, today, complete, col
         {mystery ? 'A secret picture' : art.name}
       </p>
       {complete ? (
-        <HoloCard art={art} habitName={habit.name} date={range.completedAt ?? (total === 1 ? habit.completedAt : undefined)} />
+        <Sticker art={art} habitName={habit.name} date={range.completedAt ?? (total === 1 ? habit.completedAt : undefined)} board />
       ) : (
         <PixelCanvas art={art} brightness={pixelBrightness} ghost={peek && range.mode === 'chosen'} className="stage" label={mystery ? 'Your picture so far' : art.name} />
       )}
@@ -218,7 +218,7 @@ export function Tracker({ habit, threshold, onLog, onDelete, onBack, onExtend }:
           <Confetti colors={palette} />
           <div className="sheet" onClick={(e) => e.stopPropagation()}>
             <h2>{allComplete ? 'You did it!' : 'Picture complete!'}</h2>
-            <HoloCard art={celebratingArt} habitName={habit.name} date={celebrating.completedAt ?? habit.completedAt} />
+            <Sticker art={celebratingArt} habitName={habit.name} date={celebrating.completedAt ?? habit.completedAt} board />
             <div className="actions">
               <button className="btn primary" onClick={() => setCelebrate(null)}>
                 Nice
