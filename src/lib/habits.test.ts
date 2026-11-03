@@ -31,7 +31,7 @@ describe('parseState', () => {
     expect(parseState('{"version":2}')).toEqual(emptyState())
   })
   it('round-trips a valid state', () => {
-    const s = { ...emptyState(), habits: [habit({ 1: 80 })] }
+    const s = { ...emptyState(), habits: [habit({ 1: 80 })], stickers: { 'h:0': { x: 0.4, y: 120, z: 2 } } }
     expect(parseState(JSON.stringify(s))).toEqual(s)
   })
 })

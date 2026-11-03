@@ -1,6 +1,8 @@
 import { findArt } from '../lib/art'
 import { chapterRanges, chapterRevealed, revealedCount, type AppState } from '../lib/habits'
 import { PixelCanvas } from './PixelCanvas'
+import { Stickers } from './Stickers'
+import type { Pos } from '../lib/stickers'
 import { useMemo } from 'react'
 import { splitIntoRegions } from '../lib/regions'
 import type { Habit } from '../lib/habits'
@@ -10,6 +12,7 @@ interface Props {
   onOpen: (id: string) => void
   onNew: () => void
   onThreshold: (n: number) => void
+  onMoveSticker: (key: string, pos: Pos) => void
 }
 
 function Card({ habit, threshold, onOpen }: { habit: Habit; threshold: number; onOpen: () => void }) {
@@ -29,7 +32,7 @@ function Card({ habit, threshold, onOpen }: { habit: Habit; threshold: number; o
   }, [regions, habit.efforts, range.offset, threshold])
 
   return (
-    <button className={`card ${complete ? 'complete' : ''}`} onClick={onOpen}>
+    <button className="card" onClick={onOpen}>
       {!art ? (
         <div className="mini missing">?</div>
       ) : complete ? (
@@ -51,10 +54,10 @@ function Card({ habit, threshold, onOpen }: { habit: Habit; threshold: number; o
   )
 }
 
-export function Home({ state, onOpen, onNew, onThreshold }: Props) {
+export function Home({ state, onOpen, onNew, onThreshold, onMoveSticker }: Props) {
   const isDone = (h: Habit) => revealedCount(h, state.threshold) >= h.days
   const active = state.habits.filter((h) => !isDone(h))
-  const done = state.habits.filter(isDone)
+  const anyDone = state.habits.some(isDone)
   return (
     <main>
       <section className="callout">
@@ -72,7 +75,7 @@ export function Home({ state, onOpen, onNew, onThreshold }: Props) {
 
       {active.length === 0 ? (
         <p className="muted empty">
-          {done.length === 0 ? 'No habits yet. Start one and pick a picture, or let it be a surprise.' : 'Nothing in progress right now. Start a new habit to collect another picture.'}
+          {anyDone ? 'Nothing in progress right now. Start a new habit to collect another picture.' : 'No habits yet. Start one and pick a picture, or let it be a surprise.'}
         </p>
       ) : (
         <div className="cards">
@@ -82,19 +85,7 @@ export function Home({ state, onOpen, onNew, onThreshold }: Props) {
         </div>
       )}
 
-      {done.length > 0 && (
-        <>
-          <div className="row-between section-head">
-            <h2>Completed</h2>
-            <span className="muted">{done.length}</span>
-          </div>
-          <div className="cards">
-            {done.map((h) => (
-              <Card key={h.id} habit={h} threshold={state.threshold} onOpen={() => onOpen(h.id)} />
-            ))}
-          </div>
-        </>
-      )}
+      <Stickers habits={state.habits} threshold={state.threshold} positions={state.stickers} onMove={onMoveSticker} onOpenHabit={onOpen} />
 
       <section className="settings">
         <label>

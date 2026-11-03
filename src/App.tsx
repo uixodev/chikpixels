@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react'
 import { ExtendHabit } from './components/ExtendHabit'
-import { Gallery } from './components/Gallery'
 import { Home } from './components/Home'
 import { Wordmark } from './components/Logo'
 import { NewHabit } from './components/NewHabit'
 import { Tracker } from './components/Tracker'
 import { applyLog, loadState, saveState, type AppState } from './lib/habits'
-import { collectedPictures } from './lib/gallery'
 
-type View = { name: 'home' } | { name: 'gallery' } | { name: 'new' } | { name: 'habit'; id: string } | { name: 'extend'; id: string }
+type View = { name: 'home' } | { name: 'new' } | { name: 'habit'; id: string } | { name: 'extend'; id: string }
 
 export default function App() {
   const [state, setState] = useState<AppState>(loadState)
@@ -27,25 +25,13 @@ export default function App() {
         </button>
       </header>
 
-      {(view.name === 'home' || view.name === 'gallery') && (
-        <nav className="tabs" aria-label="Sections">
-          <button className={`tab ${view.name === 'home' ? 'on' : ''}`} onClick={() => setView({ name: 'home' })}>
-            Habits
-          </button>
-          <button className={`tab ${view.name === 'gallery' ? 'on' : ''}`} onClick={() => setView({ name: 'gallery' })}>
-            Gallery · {collectedPictures(state.habits, state.threshold).length}
-          </button>
-        </nav>
-      )}
-
-      {view.name === 'gallery' && <Gallery habits={state.habits} threshold={state.threshold} />}
-
       {view.name === 'home' && (
         <Home
           state={state}
           onOpen={(id) => setView({ name: 'habit', id })}
           onNew={() => setView({ name: 'new' })}
           onThreshold={(threshold) => update((s) => ({ ...s, threshold }))}
+          onMoveSticker={(key, pos) => update((s) => ({ ...s, stickers: { ...s.stickers, [key]: pos } }))}
         />
       )}
 

@@ -1,3 +1,5 @@
+import type { Pos } from './stickers'
+
 export type Mode = 'secret' | 'chosen'
 
 /** How a day is logged. Count turns progress toward a target into effort. */
@@ -41,13 +43,15 @@ export interface AppState {
   /** Minimum effort for a day to count and reveal its part of the picture. */
   threshold: number
   habits: Habit[]
+  /** Where each finished picture's sticker sits, keyed `habitId:chapterIndex`. */
+  stickers: Record<string, Pos>
 }
 
 export const DEFAULT_THRESHOLD = 20
 export const STORAGE_KEY = 'chikpixels:v1'
 
 export function emptyState(): AppState {
-  return { version: 1, threshold: DEFAULT_THRESHOLD, habits: [] }
+  return { version: 1, threshold: DEFAULT_THRESHOLD, habits: [], stickers: {} }
 }
 
 export function parseState(raw: string | null): AppState {

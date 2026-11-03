@@ -11,8 +11,7 @@ A habit tracker where showing up reveals a pixel-art picture, one piece at a tim
 - **Choose or be surprised.** Pick a picture and peek at its outline, or let the app choose a secret one that is only named when you finish.
 - **Extend a habit.** Keep going after (or before) finishing: extending adds a new picture after the current one, with the same pace. Nothing you've revealed changes.
 - **Die-cut stickers.** A finished picture becomes a sticker: a white outline that follows the pixel shape, a soft shadow, a "done" label, and a gloss that slides across only the picture (it follows your pointer and drifts at rest; reduced-motion users get it still).
-- **Gallery whiteboard.** Every finished picture is stuck on a whiteboard as a sticker (tap one for a big view with its number and finish date). Pictures you haven't earned yet wait in a "Still to find" row.
-- **Completed habits** get their own black section on the home screen, below the ones in progress.
+- **One page.** Habits in progress and your finished pictures share the home screen. Finished pictures sit on the squared paper as stickers you can drag anywhere (positions are saved); tap one for details or to reopen its habit.
 - Data lives in your browser (`localStorage`). No accounts yet.
 
 ## Develop
