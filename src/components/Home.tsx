@@ -1,8 +1,7 @@
-import { findArt } from '../lib/art'
+import { buildMosaic, findArt } from '../lib/art'
 import { revealedCount, type AppState } from '../lib/habits'
-import { PixelCanvas } from './PixelCanvas'
 import { useMemo } from 'react'
-import { splitIntoRegions } from '../lib/regions'
+import { MosaicBoard } from './MosaicBoard'
 import type { Habit } from '../lib/habits'
 
 interface Props {
@@ -14,24 +13,19 @@ interface Props {
 
 function Card({ habit, threshold, onOpen }: { habit: Habit; threshold: number; onOpen: () => void }) {
   const art = findArt(habit.artId)
+  const mosaic = useMemo(() => (art ? buildMosaic(art, habit.cell) : undefined), [art, habit.cell])
   const done = revealedCount(habit, threshold)
-  const regions = useMemo(
-    () => (art ? splitIntoRegions(art.pixels, art.width, art.height, habit.days) : []),
-    [art, habit.days],
-  )
-  const pixelBrightness = useMemo(() => {
-    const out: (number | undefined)[] = []
-    if (!art) return out
-    regions.forEach((r, d) => {
-      if ((habit.efforts[d] ?? -1) >= threshold) r.forEach((i) => (out[i] = 1))
-    })
-    return out
-  }, [art, regions, habit.efforts, threshold])
   const complete = done >= habit.days
 
   return (
     <button className="card" onClick={onOpen}>
-      {art ? <PixelCanvas art={art} brightness={pixelBrightness} className="mini" /> : <div className="mini missing">?</div>}
+      <div className="mini">
+        {mosaic ? (
+          <MosaicBoard mosaic={mosaic} efforts={habit.efforts} threshold={threshold} compact label={`${habit.name} progress`} />
+        ) : (
+          <div className="missing">?</div>
+        )}
+      </div>
       <div className="card-body">
         <strong>{habit.name}</strong>
         <span className="muted">

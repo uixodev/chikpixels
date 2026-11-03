@@ -69,6 +69,7 @@ input[type='range'] { width: 100%; accent-color: var(--ink); }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .chip { font: inherit; font-size: 14px; border: 2px solid var(--ink); background: var(--paper); padding: 6px 12px; cursor: pointer; min-height: 36px; border-radius: 0; }
 .chip.on { background: var(--ink); color: var(--paper); }
+.chip small { opacity: 0.7; margin-left: 4px; }
 .chip:disabled { opacity: 0.3; cursor: not-allowed; }
 
 /* Grid paper that lines up with the pixels */
@@ -84,8 +85,6 @@ input[type='range'] { width: 100%; accent-color: var(--ink); }
   line-height: 0;
 }
 .paper canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
-.stage { max-width: 420px; align-self: center; box-shadow: 6px 6px 0 var(--ink); }
-.stage.small { max-width: 220px; margin: 12px auto; box-shadow: none; }
 
 /* Gallery */
 .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px; }
@@ -96,8 +95,8 @@ input[type='range'] { width: 100%; accent-color: var(--ink); }
 /* Home cards */
 .cards { display: flex; flex-direction: column; gap: 12px; }
 .card { font: inherit; text-align: left; display: flex; gap: 14px; align-items: center; background: var(--paper); border: 2px solid var(--ink); padding: 10px; cursor: pointer; border-radius: 0; box-shadow: 3px 3px 0 var(--ink); color: inherit; }
-.card .mini { width: 72px; flex: none; background-image: none; border-width: 0; background-color: #f4f4f4; }
-.card .missing { height: 72px; display: grid; place-items: center; font-size: 28px; }
+.card .mini { width: 72px; flex: none; }
+.card .missing { height: 72px; display: grid; place-items: center; font-size: 28px; border: 2px solid var(--ink); }
 .card-body { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
 .bar { display: block; height: 8px; border: 2px solid var(--ink); background: var(--paper); }
 .bar i { display: block; height: 100%; background: var(--ink); }
@@ -105,11 +104,21 @@ input[type='range'] { width: 100%; accent-color: var(--ink); }
 .settings { margin-top: 12px; padding-top: 16px; border-top: 2px dashed var(--line); font-size: 14px; }
 .settings label { display: flex; flex-direction: column; gap: 8px; }
 
-/* Day board */
-.board { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; }
-.day { font: inherit; font-size: 13px; min-height: 44px; border: 2px solid var(--ink); background: var(--paper); cursor: pointer; border-radius: 0; color: var(--ink); }
-.day.done { background: var(--ink); color: var(--paper); }
-.day.low { border-style: dashed; background: repeating-linear-gradient(45deg, #fff, #fff 4px, #eee 4px, #eee 8px); }
+/* Mosaic: every square is one habit day and one piece of the picture */
+.mosaic { display: grid; gap: 3px; width: 100%; line-height: 1; }
+.cell {
+  font: inherit; font-size: clamp(9px, 2.6vw, 12px); color: var(--muted);
+  aspect-ratio: 1; min-width: 0; padding: 0; border: 2px solid var(--ink); border-radius: 0;
+  background: var(--paper); cursor: pointer; display: grid; place-items: center;
+}
+div.cell { cursor: default; }
+.cell.done { border-color: rgba(0, 0, 0, 0.22); }
+.cell.low { border-style: dashed; background: repeating-linear-gradient(45deg, #fff, #fff 4px, #ececec 4px, #ececec 8px); }
+.mosaic.compact { gap: 1px; }
+.compact .cell { border-width: 1px; }
+.stage { max-width: 440px; align-self: center; width: 100%; }
+.stage.small { max-width: 220px; margin: 12px auto; }
+.preview { max-width: 200px; }
 
 /* Sheets */
 .scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); display: flex; align-items: flex-end; justify-content: center; z-index: 10; }

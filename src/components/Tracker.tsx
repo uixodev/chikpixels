@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Art } from '../lib/art'
-import { brightness, isRevealed, revealedCount, type Habit } from '../lib/habits'
-import { splitIntoRegions } from '../lib/regions'
+import { buildMosaic, type Art } from '../lib/art'
+import { revealedCount, type Habit } from '../lib/habits'
 import { Confetti } from './Confetti'
 import { EffortSheet } from './EffortSheet'
+import { MosaicBoard } from './MosaicBoard'
 import { PixelCanvas } from './PixelCanvas'
 
 interface Props {
@@ -20,16 +20,7 @@ export function Tracker({ habit, art, threshold, onEffort, onDelete, onBack }: P
   const [peek, setPeek] = useState(false)
   const [celebrate, setCelebrate] = useState(false)
 
-  const regions = useMemo(() => splitIntoRegions(art.pixels, art.width, art.height, habit.days), [art, habit.days])
-  const pixelBrightness = useMemo(() => {
-    const out: (number | undefined)[] = new Array(art.pixels.length).fill(undefined)
-    regions.forEach((region, d) => {
-      const e = habit.efforts[d]
-      if (isRevealed(e, threshold)) region.forEach((i) => (out[i] = brightness(e, threshold)))
-    })
-    return out
-  }, [art, regions, habit.efforts, threshold])
-
+  const mosaic = useMemo(() => buildMosaic(art, habit.cell), [art, habit.cell])
   const done = revealedCount(habit, threshold)
   const complete = done >= habit.days
   const wasComplete = useRef(complete)
@@ -39,7 +30,7 @@ export function Tracker({ habit, art, threshold, onEffort, onDelete, onBack }: P
   }, [complete])
 
   const mystery = habit.mode === 'secret' && !complete
-  const palette = useMemo(() => Array.from(new Set(art.pixels.map((p) => p.color))).slice(0, 8), [art])
+  const palette = useMemo(() => Array.from(new Set(mosaic.colors)).slice(0, 8), [mosaic])
 
   return (
     <main>
@@ -54,33 +45,30 @@ export function Tracker({ habit, art, threshold, onEffort, onDelete, onBack }: P
       </div>
       <p className="muted">{mystery ? 'A secret picture' : art.name}</p>
 
-      <PixelCanvas art={art} brightness={pixelBrightness} ghost={peek && habit.mode === 'chosen' && !complete} className="stage" label={mystery ? 'Your picture so far' : art.name} />
+      <div className="stage">
+        <MosaicBoard
+          mosaic={mosaic}
+          efforts={habit.efforts}
+          threshold={threshold}
+          ghost={peek && habit.mode === 'chosen' && !complete}
+          onPick={setEditing}
+          label={mystery ? 'Your days. Each square is a piece of a secret picture.' : `Your days. Each square is a piece of ${art.name}.`}
+        />
+      </div>
+      <p className="muted">Every square is one day. Tap any square, in any order, and log your effort. Missed one? Fill it in later.</p>
 
       {habit.mode === 'chosen' && !complete && (
         <button className="btn small" onClick={() => setPeek((p) => !p)} aria-pressed={peek}>
-          {peek ? 'Hide outline' : 'Peek at outline'}
+          {peek ? 'Hide preview' : 'Peek at the picture'}
         </button>
       )}
 
-      <h2>Tap a day to log it</h2>
-      <p className="muted">Pick any slot, in any order. Missed one? Fill it in later.</p>
-      <div className="board">
-        {Array.from({ length: habit.days }, (_, d) => {
-          const e = habit.efforts[d]
-          const state = e === undefined ? 'empty' : isRevealed(e, threshold) ? 'done' : 'low'
-          return (
-            <button
-              key={d}
-              className={`day ${state}`}
-              style={state === 'done' ? { opacity: 0.45 + 0.55 * (e / 100) } : undefined}
-              onClick={() => setEditing(d)}
-              aria-label={`Day ${d + 1}${e !== undefined ? `, effort ${e}` : ', not logged'}`}
-            >
-              {d + 1}
-            </button>
-          )
-        })}
-      </div>
+      {complete && (
+        <>
+          <h2>The full picture</h2>
+          <PixelCanvas art={art} full className="stage" label={art.name} />
+        </>
+      )}
 
       <button
         className="btn ghost danger"
