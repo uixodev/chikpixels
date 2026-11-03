@@ -1,3 +1,4 @@
+import { ArrowLeft } from './components/ArrowLeft'
 import { useEffect, useState } from 'react'
 import { Home } from './components/Home'
 import { Wordmark } from './components/Logo'
@@ -78,7 +79,7 @@ export default function App() {
       {view.name === 'habit' && habit && !art && (
         <main>
           <button className="btn ghost back" onClick={() => setView({ name: 'home' })}>
-            ← My habits
+            <ArrowLeft /> My habits
           </button>
           <p className="callout small">
             <span>This habit's picture is not in the library on this device, so it cannot be shown here.</span>

@@ -1,3 +1,4 @@
+import { ArrowLeft } from './ArrowLeft'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Art } from '../lib/art'
 import { brightness, isRevealed, revealedCount, type Habit } from '../lib/habits'
@@ -44,7 +45,7 @@ export function Tracker({ habit, art, threshold, onEffort, onDelete, onBack }: P
   return (
     <main>
       <button className="btn ghost back" onClick={onBack}>
-        ← My habits
+        <ArrowLeft /> My habits
       </button>
       <div className="row-between">
         <h1>{habit.name}</h1>

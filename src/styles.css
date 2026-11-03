@@ -46,7 +46,7 @@ p { margin: 0; line-height: 1.5; }
 .btn.primary, .btn.on { background: var(--ink); color: var(--paper); }
 .btn.small { min-height: 36px; padding: 6px 12px; font-size: 14px; align-self: flex-start; }
 .btn.ghost { border-color: transparent; box-shadow: none; background: transparent; }
-.btn.ghost.back { align-self: flex-start; padding-left: 0; }
+.btn.ghost.back { align-self: flex-start; padding-left: 0; display: inline-flex; align-items: center; gap: 10px; }
 .btn.danger { color: var(--warn); align-self: flex-start; }
 .btn.wide { width: 100%; }
 .btn:disabled { opacity: 0.35; cursor: not-allowed; }

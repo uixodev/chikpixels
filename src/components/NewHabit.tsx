@@ -1,3 +1,4 @@
+import { ArrowLeft } from './ArrowLeft'
 import { useMemo, useState } from 'react'
 import { library, themeLabels, type Art, type Theme } from '../lib/art'
 import { LENGTH_PRESETS, newId, type Habit, type Mode } from '../lib/habits'
@@ -48,7 +49,7 @@ export function NewHabit({ habits, onCreate, onCancel }: Props) {
   return (
     <main>
       <button className="btn ghost back" onClick={onCancel}>
-        ← Back
+        <ArrowLeft /> Back
       </button>
       <h1>New habit</h1>
 
