@@ -12,6 +12,8 @@ export interface Chapter {
   /** Number of squares (slots) this chapter spans. */
   days: number
   mode: Mode
+  /** Date this picture was finished (YYYY-MM-DD). */
+  completedAt?: string
 }
 
 export interface Habit {
@@ -130,6 +132,13 @@ export function applyLog(habit: Habit, day: number, value: number | null, thresh
   const complete = revealedCount(next, threshold) >= next.days
   if (complete && !next.completedAt) next.completedAt = todayISO()
   if (!complete) delete next.completedAt
+  if (next.chapters) {
+    const ranges = chapterRanges(next)
+    next.chapters = next.chapters.map((c, i) => {
+      const { completedAt: _old, ...rest } = c
+      return chapterRevealed(next, ranges[i], threshold) >= c.days ? { ...rest, completedAt: c.completedAt ?? todayISO() } : rest
+    })
+  }
   return next
 }
 
@@ -160,7 +169,9 @@ export function chapterRevealed(habit: Habit, range: { offset: number; days: num
 
 /** Add a new picture after the current ones. Nothing already logged changes. */
 export function extendHabit(habit: Habit, chapter: Chapter): Habit {
-  const next: Habit = { ...habit, chapters: [...chaptersOf(habit), chapter], days: habit.days + chapter.days }
+  // A habit without chapters has one picture whose finish date lives on the habit itself.
+  const existing = habit.chapters ?? chaptersOf(habit).map((c) => ({ ...c, completedAt: habit.completedAt }))
+  const next: Habit = { ...habit, chapters: [...existing, chapter], days: habit.days + chapter.days }
   delete next.completedAt
   return next
 }

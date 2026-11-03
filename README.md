@@ -10,7 +10,8 @@ A habit tracker where showing up reveals a pixel-art picture, one piece at a tim
 - **Effort sets how vivid it is.** A piece only appears at or above the threshold (default 20); more effort means brighter colour.
 - **Choose or be surprised.** Pick a picture and peek at its outline, or let the app choose a secret one that is only named when you finish.
 - **Extend a habit.** Keep going after (or before) finishing: extending adds a new picture after the current one, with the same pace. Nothing you've revealed changes.
-- **Holographic finished pictures.** Completed pictures and habit cards get an animated rainbow foil with a diamond lattice, like a trading card (it follows your pointer; reduced-motion users get it still).
+- **Holographic finished pictures.** Completed pictures and habit cards get an animated rainbow foil with a diamond lattice, like a trading card (quiet at rest, livelier when touched; reduced-motion users get it still).
+- **Gallery.** Every finished picture is collected in a Gallery tab (newest first) with the date you finished it, plus locked slots for pictures you haven't earned yet.
 - Data lives in your browser (`localStorage`). No accounts yet.
 
 ## Develop

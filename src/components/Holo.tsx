@@ -4,8 +4,8 @@ import type { PointerEvent, ReactNode } from 'react'
 const reduced = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 /**
- * Holographic foil for finished pictures: a drifting rainbow sheen, a diamond lattice and
- * sparkles. The shine follows the pointer and the card tilts slightly, like a trading card.
+ * Holographic foil for finished pictures. Quiet at rest (a soft pearly tint and an occasional
+ * sheen), and livelier when touched: the glare follows the pointer and the card tilts slightly.
  */
 export function Holo({ children, className = '' }: { children: ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -16,6 +16,7 @@ export function Holo({ children, className = '' }: { children: ReactNode; classN
     const r = el.getBoundingClientRect()
     const x = (e.clientX - r.left) / r.width
     const y = (e.clientY - r.top) / r.height
+    el.dataset.active = '1'
     el.style.setProperty('--mx', `${Math.round(x * 100)}%`)
     el.style.setProperty('--my', `${Math.round(y * 100)}%`)
     el.style.setProperty('--rx', `${((0.5 - y) * 12).toFixed(1)}deg`)
@@ -25,6 +26,7 @@ export function Holo({ children, className = '' }: { children: ReactNode; classN
   function leave() {
     const el = ref.current
     if (!el) return
+    delete el.dataset.active
     for (const v of ['--mx', '--my', '--rx', '--ry']) el.style.removeProperty(v)
   }
 

@@ -149,51 +149,61 @@ details summary { cursor: pointer; padding: 8px 0; font-size: 14px; }
 details .board { margin-top: 8px; }
 .tile:disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* Holographic foil for finished pictures, like a trading card: a pearly rainbow backdrop,
-   a bright rainbow band that sweeps across, pixel diamonds that twinkle, and a glare that
-   follows the pointer. No lines drawn over the art. */
+/* Holographic foil for finished pictures. Quiet at rest, livelier when touched. */
 .holo {
-  --mx: 50%; --my: 50%; --rx: 0deg; --ry: 0deg;
+  --mx: 50%; --my: 50%; --rx: 0deg; --ry: 0deg; --foil: 0.5;
   position: relative; isolation: isolate; overflow: hidden; line-height: 0; width: 100%;
   transform: perspective(700px) rotateX(var(--rx)) rotateY(var(--ry));
   transition: transform 0.15s ease-out;
 }
+.holo[data-active] { --foil: 1; }
 .holo > .paper {
   border: 0;
-  background-image: linear-gradient(100deg, #ffbfe0, #ffe99a, #aef5d6, #a9dcff, #d3bfff, #ffbfe0);
+  background-image: linear-gradient(100deg, #fde6f1, #fff6d6, #e2faee, #e0f0ff, #ece2ff, #fde6f1);
   background-size: 300% 100%;
-  animation: holo-pearl 9s linear infinite;
+  animation: holo-pearl 20s linear infinite;
 }
-.holo::before, .holo::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.holo::before, .holo::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 3; transition: opacity 0.4s; }
 .holo::before {
+  opacity: var(--foil);
   background:
-    radial-gradient(circle at var(--mx) var(--my), rgba(255, 255, 255, 0.75), transparent 42%),
-    linear-gradient(105deg, transparent 38%, rgba(255, 90, 170, 0.5) 43%, rgba(255, 220, 80, 0.55) 46.5%, rgba(255, 255, 255, 0.85) 50%, rgba(80, 235, 200, 0.55) 53.5%, rgba(90, 170, 255, 0.5) 57%, transparent 62%);
+    radial-gradient(circle at var(--mx) var(--my), rgba(255, 255, 255, 0.45), transparent 40%),
+    linear-gradient(105deg, transparent 42%, rgba(255, 130, 190, 0.22) 45%, rgba(255, 230, 120, 0.26) 47.5%, rgba(255, 255, 255, 0.4) 50%, rgba(120, 235, 205, 0.26) 52.5%, rgba(130, 190, 255, 0.22) 55%, transparent 58%);
   background-size: 100% 100%, 260% 100%;
   background-position: 0 0, 0% 0;
-  animation: holo-shine 4.5s ease-in-out infinite;
+  animation: holo-shine 9s ease-in-out infinite;
 }
 .holo::after {
+  opacity: calc(var(--foil) * 0.35);
   background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%20shape-rendering='crispEdges'%3E%3Cg%20fill='white'%3E%3Crect%20x='14'%20y='14'%20width='1'%20height='1'/%3E%3Crect%20x='13'%20y='15'%20width='3'%20height='1'/%3E%3Crect%20x='12'%20y='16'%20width='5'%20height='1'/%3E%3Crect%20x='13'%20y='17'%20width='3'%20height='1'/%3E%3Crect%20x='14'%20y='18'%20width='1'%20height='1'/%3E%3Crect%20x='46'%20y='40'%20width='1'%20height='1'/%3E%3Crect%20x='45'%20y='41'%20width='3'%20height='1'/%3E%3Crect%20x='44'%20y='42'%20width='5'%20height='1'/%3E%3Crect%20x='45'%20y='43'%20width='3'%20height='1'/%3E%3Crect%20x='46'%20y='44'%20width='1'%20height='1'/%3E%3Crect%20x='52'%20y='9'%20width='1'%20height='1'/%3E%3Crect%20x='51'%20y='10'%20width='3'%20height='1'/%3E%3Crect%20x='52'%20y='11'%20width='1'%20height='1'/%3E%3Crect%20x='24'%20y='51'%20width='1'%20height='1'/%3E%3Crect%20x='23'%20y='52'%20width='3'%20height='1'/%3E%3Crect%20x='24'%20y='53'%20width='1'%20height='1'/%3E%3Crect%20x='6'%20y='37'%20width='1'%20height='1'/%3E%3Crect%20x='5'%20y='38'%20width='3'%20height='1'/%3E%3Crect%20x='6'%20y='39'%20width='1'%20height='1'/%3E%3Crect%20x='36'%20y='25'%20width='1'%20height='1'/%3E%3Crect%20x='35'%20y='26'%20width='3'%20height='1'/%3E%3Crect%20x='36'%20y='27'%20width='1'%20height='1'/%3E%3Crect%20x='60'%20y='55'%20width='1'%20height='1'/%3E%3Crect%20x='59'%20y='56'%20width='3'%20height='1'/%3E%3Crect%20x='60'%20y='57'%20width='1'%20height='1'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 96px 96px;
-  animation: holo-twinkle 1.8s ease-in-out infinite alternate;
+  background-size: 128px 128px;
+  animation: holo-twinkle 3s ease-in-out infinite alternate;
 }
 .holo.mini { width: 72px; flex: none; }
-.holo.mini::after { background-size: 48px 48px; }
+.holo.mini::after { background-size: 64px 64px; }
 @keyframes holo-pearl { to { background-position: 150% 0; } }
-@keyframes holo-shine { 0%, 20% { background-position: 0 0, 0% 0; } 80%, 100% { background-position: 0 0, 100% 0; } }
-@keyframes holo-twinkle { from { opacity: 0.25; } to { opacity: 0.95; } }
+@keyframes holo-shine { 0%, 40% { background-position: 0 0, 0% 0; } 85%, 100% { background-position: 0 0, 100% 0; } }
+@keyframes holo-twinkle { from { transform: translateY(0); } to { transform: translateY(-4px); } }
 
+/* Finished habit card: a soft rainbow edge, no motion */
 .card.complete {
   border-color: transparent;
   background:
     linear-gradient(#fff, #fff) padding-box,
-    linear-gradient(90deg, #ff5fa2, #ffd35f, #5fffb0, #5fd0ff, #b07bff, #ff5fa2) border-box;
-  background-size: 100% 100%, 300% 100%;
-  animation: holo-border 5s linear infinite;
+    linear-gradient(90deg, #f4a3c8, #f5dc8a, #9fe8c4, #9ccdf5, #c8b0f5) border-box;
 }
-@keyframes holo-border { from { background-position: 0 0, 0% 0; } to { background-position: 0 0, 150% 0; } }
+
+/* Tabs and gallery */
+.tabs { display: flex; gap: 8px; margin: 4px 0 16px; }
+.tab { flex: 1; font: inherit; font-weight: 500; padding: 10px; min-height: 44px; border: 2px solid var(--ink); background: var(--paper); cursor: pointer; border-radius: 0; color: var(--ink); }
+.tab.on { background: var(--ink); color: var(--paper); }
+.shelf { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.slot { font: inherit; color: inherit; background: var(--paper); border: 2px solid var(--ink); padding: 8px; display: flex; flex-direction: column; gap: 4px; text-align: center; cursor: pointer; border-radius: 0; box-shadow: 3px 3px 0 var(--ink); }
+.slot .holo { margin-bottom: 4px; }
+.slot.locked { cursor: default; box-shadow: none; border-style: dashed; opacity: 0.6; }
+.slot .blank { aspect-ratio: 1; display: grid; place-items: center; font-size: 32px; background: repeating-linear-gradient(45deg, #fff, #fff 6px, #f1f1f1 6px, #f1f1f1 12px); }
+.stage.big { max-width: 300px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .holo, .holo::before, .holo::after, .holo > .paper, .card.complete { animation: none; transition: none; transform: none; }
+  .holo, .holo::before, .holo::after, .holo > .paper { animation: none; transition: none; transform: none; }
 }

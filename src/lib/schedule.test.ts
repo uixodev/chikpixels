@@ -97,3 +97,35 @@ describe('extending a habit', () => {
     expect(h.completedAt).toBeDefined()
   })
 })
+
+import { collectedPictures, lockedPictures } from './gallery'
+
+describe('gallery', () => {
+  const done = (id: string, artId: string, days: number): Habit => ({
+    ...base, id, name: id, artId, days, track: { type: 'check' },
+    efforts: Object.fromEntries(Array.from({ length: days }, (_, i) => [i, 100])),
+  })
+
+  it('lists finished pictures with their dates and locks the rest', () => {
+    const a = { ...done('a', 'heart', 2), completedAt: '2026-02-01' }
+    const b = { ...base, id: 'b', name: 'b', artId: 'star', days: 2, track: { type: 'check' } as const, efforts: { 0: 100 } }
+    const got = collectedPictures([a, b], 20)
+    expect(got.map((c) => [c.art.id, c.completedAt])).toEqual([['heart', '2026-02-01']])
+    expect(lockedPictures(got).map((x) => x.id)).not.toContain('heart')
+    expect(lockedPictures(got).map((x) => x.id)).toContain('star')
+  })
+
+  it('keeps the first picture and its date after extending', () => {
+    const h = extendHabit({ ...done('a', 'heart', 2), completedAt: '2026-02-01' }, { artId: 'star', days: 2, mode: 'chosen' })
+    const got = collectedPictures([h], 20)
+    expect(got.map((c) => [c.art.id, c.completedAt])).toEqual([['heart', '2026-02-01']])
+  })
+
+  it('dates a chapter when it is finished', () => {
+    let h = extendHabit({ ...done('a', 'heart', 1), completedAt: '2026-02-01' }, { artId: 'star', days: 1, mode: 'chosen' })
+    h = applyLog(h, 1, 1, 20)
+    const got = collectedPictures([h], 20)
+    expect(got.map((c) => c.art.id).sort()).toEqual(['heart', 'star'])
+    expect(got.find((c) => c.art.id === 'star')?.completedAt).toBeDefined()
+  })
+})
