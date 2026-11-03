@@ -37,7 +37,6 @@ export default function App() {
           state={state}
           onOpen={(id) => setView({ name: 'habit', id })}
           onNew={() => setView({ name: 'new' })}
-          onThreshold={(threshold) => update((s) => ({ ...s, threshold }))}
           onExtend={(id) => setView({ name: 'extend', id })}
           onMoveSticker={(key, pos) => update((s) => ({ ...s, stickers: { ...s.stickers, [key]: pos } }))}
         />

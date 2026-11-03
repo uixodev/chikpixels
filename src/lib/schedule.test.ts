@@ -137,4 +137,14 @@ describe('gallery', () => {
     const one = { ...done('Once', 'cup', 1), name: 'Once', completedAt: '2026-02-01' }
     expect(stickerLabel(collectedPictures([one], 20)[0])).toBe('Once · 1 day')
   })
+
+  it('keeps the pictures of an extended habit together and numbers the parts', () => {
+    const other = { ...done('Other', 'cup', 2), name: 'Other', completedAt: '2026-03-01' }
+    let ext = extendHabit({ ...done('Ext', 'heart', 2), name: 'Ext', completedAt: '2026-01-05' }, { artId: 'star', days: 3, mode: 'chosen' })
+    ext = applyLog(applyLog(applyLog(ext, 2, 1, 20), 3, 1, 20), 4, 1, 20)
+    const got = collectedPictures([ext, other], 20)
+    expect(got.map((c) => [c.habitName, c.part, c.parts])).toEqual([['Ext', 1, 2], ['Ext', 2, 2], ['Other', 1, 1]])
+    expect(stickerLabel(got[0])).toBe('Ext · part 1 of 2 · 2 days')
+    expect(stickerLabel(got[1])).toBe('Ext · part 2 of 2 · 3 days')
+  })
 })

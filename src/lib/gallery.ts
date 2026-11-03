@@ -10,6 +10,9 @@ export interface Collected {
   /** How long the picture took, in the habit's own terms (7 days, 2 weeks, 5 check-ins). */
   length: number
   unit: string
+  /** Which picture of the habit this is, and how many it has (an extended habit has several). */
+  part: number
+  parts: number
   completedAt?: string
 }
 
@@ -35,10 +38,18 @@ export function collectedPictures(habits: Habit[], threshold: number): Collected
       const art = findArt(r.artId)
       if (!art) continue
       const completedAt = r.completedAt ?? (ranges.length === 1 ? habit.completedAt : undefined)
-      out.push({ key: `${habit.id}:${r.index}`, habitId: habit.id, habitName: habit.name, art, ...lengthOf(habit, r.days), completedAt })
+      out.push({ key: `${habit.id}:${r.index}`, habitId: habit.id, habitName: habit.name, art, ...lengthOf(habit, r.days), part: r.index + 1, parts: ranges.length, completedAt })
     }
   }
-  return out.sort((a, b) => (b.completedAt ?? '').localeCompare(a.completedAt ?? ''))
+  // Keep a habit's pictures together: habits finished most recently first, each habit's pictures in order.
+  const latest = new Map<string, string>()
+  for (const c of out) latest.set(c.habitId, [latest.get(c.habitId) ?? '', c.completedAt ?? ''].sort().pop() as string)
+  return out.sort(
+    (a, b) =>
+      (latest.get(b.habitId) as string).localeCompare(latest.get(a.habitId) as string) ||
+      a.habitId.localeCompare(b.habitId) ||
+      a.part - b.part,
+  )
 }
 
 /** Library pictures nobody has finished yet, for the locked slots in the gallery. */
@@ -47,7 +58,13 @@ export function lockedPictures(collected: Collected[]): Art[] {
   return library.filter((a) => !have.has(a.id))
 }
 
-/** The text on a sticker: the habit's name and how long it ran, for example "drink water · 7 days". */
+/** The two lines on a sticker: the habit's name, then how long it ran (and which part, if extended). */
+export function stickerLabelParts(c: Collected): { title: string; detail: string } {
+  const length = `${c.length} ${c.unit}`
+  return { title: c.habitName, detail: c.parts > 1 ? `part ${c.part} of ${c.parts} · ${length}` : length }
+}
+
 export function stickerLabel(c: Collected): string {
-  return `${c.habitName} · ${c.length} ${c.unit}`
+  const { title, detail } = stickerLabelParts(c)
+  return `${title} · ${detail}`
 }

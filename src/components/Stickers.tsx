@@ -1,7 +1,7 @@
-import { useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react'
 import { library } from '../lib/art'
-import { collectedPictures, stickerLabel, type Collected } from '../lib/gallery'
+import { collectedPictures, stickerLabel, stickerLabelParts, type Collected } from '../lib/gallery'
 import type { Habit } from '../lib/habits'
 import { areaHeight, clampPos, defaultPos, tiltFor, type Pos } from '../lib/stickers'
 import { Sticker } from './Sticker'
@@ -30,11 +30,39 @@ export function Stickers({ habits, threshold, positions, onMove, onOpenHabit, on
   const [selected, setSelected] = useState<string | null>(null)
   const [live, setLive] = useState<Record<string, Pos>>({})
   const area = useRef<HTMLDivElement>(null)
+  const [width, setWidth] = useState(0)
   const drag = useRef<Drag | null>(null)
 
   const place = (c: Collected, i: number): Pos => live[c.key] ?? positions[c.key] ?? defaultPos(i, c.key)
   const all = collected.map(place)
   const height = areaHeight(collected.length, all) + (selected ? 150 : 0)
+  useLayoutEffect(() => {
+    const el = area.current
+    if (!el) return
+    const measure = () => setWidth(el.getBoundingClientRect().width)
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [collected.length])
+
+  // A dashed line with an arrow joins each picture of an extended habit to the next one.
+  const stickerW = Math.min(width * 0.46, 190)
+  const centre = (i: number) => ({ x: all[i].x * width, y: all[i].y + stickerW * 0.38 })
+  const links = collected.flatMap((c, i) => {
+    const next = collected[i + 1]
+    if (!next || next.habitId !== c.habitId || next.part !== c.part + 1) return []
+    // Run the line from the edge of one sticker to the edge of the next so the arrowhead shows.
+    const a = centre(i), b = centre(i + 1)
+    const len = Math.hypot(b.x - a.x, b.y - a.y)
+    const r = stickerW * 0.36
+    if (len < 2 * r + 24) return []
+    const ux = (b.x - a.x) / len, uy = (b.y - a.y) / len
+    const from = { x: a.x + ux * r, y: a.y + uy * r }
+    const to = { x: b.x - ux * (r + 6), y: b.y - uy * (r + 6) }
+    return [{ key: `${c.key}>${next.key}`, from, to }]
+  })
+
   const topZ = Math.max(0, ...Object.values(positions).map((p) => p.z ?? 0), ...Object.values(live).map((p) => p.z ?? 0))
 
   function down(e: PointerEvent<HTMLDivElement>, c: Collected, i: number) {
@@ -90,6 +118,18 @@ export function Stickers({ habits, threshold, positions, onMove, onOpenHabit, on
         <>
           <p className="muted">Drag the stickers around. Tap one for options.</p>
           <div ref={area} className="sticker-area" style={{ height }} onPointerDown={(e) => { if (e.target === e.currentTarget) setSelected(null) }}>
+            {width > 0 && links.length > 0 && (
+              <svg className="sk-links" aria-hidden="true">
+                <defs>
+                  <marker id="sk-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                    <path d="M1 1 L9 5 L1 9 Z" fill="currentColor" />
+                  </marker>
+                </defs>
+                {links.map((l) => (
+                  <path key={l.key} d={`M ${l.from.x} ${l.from.y} Q ${(l.from.x + l.to.x) / 2} ${Math.min(l.from.y, l.to.y) - 46} ${l.to.x} ${l.to.y}`} fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="1 8" strokeLinecap="round" markerEnd="url(#sk-arrow)" />
+                ))}
+              </svg>
+            )}
             {collected.map((c, i) => {
               const p = place(c, i)
               const dragging = live[c.key] !== undefined
@@ -108,7 +148,7 @@ export function Stickers({ habits, threshold, positions, onMove, onOpenHabit, on
                   onPointerCancel={() => { drag.current = null; setLive(({ [c.key]: _gone, ...rest }) => rest) }}
                   onKeyDown={(e) => key(e, c)}
                 >
-                  <Sticker art={c.art} compact label={stickerLabel(c)} />
+                  <Sticker art={c.art} compact label={stickerLabelParts(c).title} sublabel={stickerLabelParts(c).detail} />
                   {isSel && (
                     <div className="sk-actions" onPointerDown={(e) => e.stopPropagation()} onPointerUp={(e) => e.stopPropagation()}>
                       <button className="btn small" onClick={() => { setSelected(null); onExtend(c.habitId) }}>
