@@ -1,5 +1,5 @@
 {
-  "id": "star", "name": "Star", "theme": "objects", "width": 13, "height": 12,
+  "id": "star", "name": "Star", "theme": "objects", "collection": "originals", "width": 13, "height": 12,
   "palette": { "a": "#a86a00", "b": "#ffc81e", "c": "#fff08a" },
   "rows": [
     "......a......",

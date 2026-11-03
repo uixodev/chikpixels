@@ -1,7 +1,7 @@
 {
  "id": "bart",
  "name": "Bart",
- "theme": "characters",
+ "theme": "characters", "collection": "simpsons",
  "width": 24,
  "height": 24,
  "background": "#51f0ff",

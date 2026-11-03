@@ -195,6 +195,10 @@ details .board { margin-top: 8px; }
 }
 
 /* The collection: one set per habit, stickers side by side on the squared paper */
+.collections { display: flex; flex-direction: column; gap: 32px; margin-top: 18px; }
+.collection { display: flex; flex-direction: column; gap: 4px; }
+.coll-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-bottom: 2px solid var(--ink); padding-bottom: 4px; }
+.coll-head h3 { margin: 0; font-size: 16px; }
 .sets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 12px; align-items: start; padding-top: 16px; }
 .set { --w: min(42vw, 180px); --h: calc(var(--w) * 0.7); --lab: 46px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .set.multi.open { grid-column: 1 / -1; }

@@ -5,6 +5,8 @@ export interface ArtFile {
   id: string
   name: string
   theme: Theme
+  /** Which collection the picture belongs to, for example 'simpsons'. */
+  collection?: string
   width: number
   height: number
   palette: Record<string, string>
@@ -21,6 +23,7 @@ export interface Art {
   id: string
   name: string
   theme: Theme
+  collection: string
   width: number
   height: number
   pixels: Pixel[]
@@ -43,7 +46,7 @@ export function parseArt(file: ArtFile): Art {
       pixels.push({ x, y, color })
     }
   })
-  return { id: file.id, name: file.name, theme: file.theme, width: file.width, height: file.height, pixels }
+  return { id: file.id, name: file.name, theme: file.theme, collection: file.collection ?? 'originals', width: file.width, height: file.height, pixels }
 }
 
 // Public art ships with the repo. Private art (git-ignored) is picked up if present.
@@ -57,6 +60,26 @@ export const library: Art[] = [...Object.values(publicFiles), ...Object.values(p
 export function findArt(id: string): Art | undefined {
   return library.find((a) => a.id === id)
 }
+
+/** Display names for collections, in the order they are listed. Unknown ones get a tidy default. */
+export const collectionNames: Record<string, string> = { simpsons: 'The Simpsons', originals: 'Originals' }
+export const collectionName = (id: string): string => collectionNames[id] ?? id.charAt(0).toUpperCase() + id.slice(1)
+const collectionOrder = Object.keys(collectionNames)
+export const collectionRank = (id: string): number => {
+  const i = collectionOrder.indexOf(id)
+  return i === -1 ? collectionOrder.length : i
+}
+
+export interface CollectionInfo {
+  id: string
+  name: string
+  count: number
+}
+
+/** Every collection in the library with how many pictures it holds. */
+export const collections: CollectionInfo[] = [...new Set(library.map((a) => a.collection))]
+  .sort((a, b) => collectionRank(a) - collectionRank(b) || a.localeCompare(b))
+  .map((id) => ({ id, name: collectionName(id), count: library.filter((a) => a.collection === id).length }))
 
 export const themeLabels: Record<Theme, string> = {
   cozy: 'Cozy',

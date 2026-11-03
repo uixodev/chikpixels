@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { library, themeLabels, type Theme } from '../lib/art'
+import { useState } from 'react'
+import { collections, library } from '../lib/art'
 import { PixelCanvas } from './PixelCanvas'
 
 interface Props {
@@ -10,19 +10,18 @@ interface Props {
 }
 
 export function ArtPicker({ artId, onPick, used = [] }: Props) {
-  const [theme, setTheme] = useState<Theme | 'all'>('all')
-  const themes = useMemo(() => Array.from(new Set(library.map((a) => a.theme))), [])
-  const shown = theme === 'all' ? library : library.filter((a) => a.theme === theme)
+  const [collection, setCollection] = useState<string>('all')
+  const shown = collection === 'all' ? library : library.filter((a) => a.collection === collection)
 
   return (
     <section className="field">
       <div className="chips">
-        <button className={`chip ${theme === 'all' ? 'on' : ''}`} onClick={() => setTheme('all')}>
-          All
+        <button className={`chip ${collection === 'all' ? 'on' : ''}`} onClick={() => setCollection('all')}>
+          All · {library.length}
         </button>
-        {themes.map((t) => (
-          <button key={t} className={`chip ${theme === t ? 'on' : ''}`} onClick={() => setTheme(t)}>
-            {themeLabels[t]}
+        {collections.map((c) => (
+          <button key={c.id} className={`chip ${collection === c.id ? 'on' : ''}`} onClick={() => setCollection(c.id)}>
+            {c.name} · {c.count}
           </button>
         ))}
       </div>

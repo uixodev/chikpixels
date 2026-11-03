@@ -1,5 +1,5 @@
 {
-  "id": "heart", "name": "Heart", "theme": "objects", "width": 13, "height": 11,
+  "id": "heart", "name": "Heart", "theme": "objects", "collection": "originals", "width": 13, "height": 11,
   "palette": { "a": "#8e1f3a", "b": "#e8415f", "c": "#ff9db0" },
   "rows": [
     "..aaa...aaa..",
