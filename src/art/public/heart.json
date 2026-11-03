@@ -1,0 +1,17 @@
+{
+  "id": "heart", "name": "Heart", "theme": "objects", "width": 13, "height": 11,
+  "palette": { "a": "#8e1f3a", "b": "#e8415f", "c": "#ff9db0" },
+  "rows": [
+    "..aaa...aaa..",
+    ".abbbaaabbba.",
+    "abcbbbbbbbbba",
+    "abcbbbbbbbbba",
+    "abbbbbbbbbbba",
+    ".abbbbbbbbba.",
+    "..abbbbbbba..",
+    "...abbbbba...",
+    "....abbba....",
+    ".....aba.....",
+    "......a......"
+  ]
+}

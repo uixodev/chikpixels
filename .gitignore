@@ -1,0 +1,6 @@
+node_modules
+dist
+*.local
+# Copyrighted prototype art: keep out of the public repo
+src/art/private/*
+!src/art/private/README.md
