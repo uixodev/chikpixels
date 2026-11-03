@@ -9,6 +9,8 @@ A habit tracker where showing up reveals a pixel-art picture, one piece at a tim
 - **Any order, backfill allowed.** Tap any day slot and log your effort (slider, quick buttons or a number, 0-100). Missed a day? Fill it in later.
 - **Effort sets how vivid it is.** A piece only appears at or above the threshold (default 20); more effort means brighter colour.
 - **Choose or be surprised.** Pick a picture and peek at its outline, or let the app choose a secret one that is only named when you finish.
+- **Extend a habit.** Keep going after (or before) finishing: extending adds a new picture after the current one, with the same pace. Nothing you've revealed changes.
+- **Holographic finished pictures.** Completed pictures and habit cards get an animated rainbow foil with a diamond lattice, like a trading card (it follows your pointer; reduced-motion users get it still).
 - Data lives in your browser (`localStorage`). No accounts yet.
 
 ## Develop

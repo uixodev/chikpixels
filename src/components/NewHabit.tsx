@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react'
-import { library, themeLabels, type Art, type Theme } from '../lib/art'
+import { useState } from 'react'
+import { library, type Art } from '../lib/art'
 import { newId, todayISO, type Habit, type Mode, type Schedule, type Track } from '../lib/habits'
-import { slotsPerUnit, unitName } from '../lib/schedule'
+import { LENGTH_PRESETS, slotsPerUnit, unitName } from '../lib/schedule'
 import { ArrowLeft } from './ArrowLeft'
-import { PixelCanvas } from './PixelCanvas'
+import { ArtPicker } from './ArtPicker'
 
 interface Props {
   habits: Habit[]
@@ -14,19 +14,12 @@ interface Props {
 type TrackKind = Track['type']
 type ScheduleKind = Schedule['kind']
 
-const PRESETS: Record<ScheduleKind, number[]> = {
-  daily: [7, 14, 21, 30, 66, 100],
-  weekly: [2, 4, 8, 12],
-  every: [7, 10, 14, 20, 30],
-}
-
 const toInt = (v: string, min: number, max: number) => Math.min(max, Math.max(min, Math.round(+v) || min))
 
 export function NewHabit({ habits, onCreate, onCancel }: Props) {
   const [name, setName] = useState('')
   const [mode, setMode] = useState<Mode>('chosen')
   const [artId, setArtId] = useState<string | null>(null)
-  const [theme, setTheme] = useState<Theme | 'all'>('all')
 
   const [trackKind, setTrackKind] = useState<TrackKind>('effort')
   const [target, setTarget] = useState(8)
@@ -49,8 +42,6 @@ export function NewHabit({ habits, onCreate, onCancel }: Props) {
   const effectiveUnits = Math.min(units, maxUnits)
   const slots = effectiveUnits * mult
 
-  const themes = useMemo(() => Array.from(new Set(library.map((a) => a.theme))), [])
-  const shown = theme === 'all' ? library : library.filter((a) => a.theme === theme)
   const ready = name.trim().length > 0 && slots >= 1 && (mode === 'secret' || art !== undefined) && (trackKind !== 'count' || (target >= 1 && unit.trim().length > 0))
 
   function start() {
@@ -106,29 +97,7 @@ export function NewHabit({ habits, onCreate, onCancel }: Props) {
         )}
       </fieldset>
 
-      {mode === 'chosen' && (
-        <section className="field">
-          <div className="chips">
-            <button className={`chip ${theme === 'all' ? 'on' : ''}`} onClick={() => setTheme('all')}>
-              All
-            </button>
-            {themes.map((t) => (
-              <button key={t} className={`chip ${theme === t ? 'on' : ''}`} onClick={() => setTheme(t)}>
-                {themeLabels[t]}
-              </button>
-            ))}
-          </div>
-          <div className="gallery">
-            {shown.map((a) => (
-              <button key={a.id} className={`tile ${artId === a.id ? 'on' : ''}`} onClick={() => setArtId(a.id)} aria-pressed={artId === a.id}>
-                <PixelCanvas art={a} full className="thumb" label={a.name} />
-                <span>{a.name}</span>
-                <small className="muted">{a.pixels.length} px</small>
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
+      {mode === 'chosen' && <ArtPicker artId={artId} onPick={setArtId} />}
 
       <fieldset className="field">
         <legend>How do you track it?</legend>
@@ -152,7 +121,7 @@ export function NewHabit({ habits, onCreate, onCancel }: Props) {
 
       <fieldset className="field">
         <legend>How often?</legend>
-        <select value={schedKind} onChange={(e) => { const k = e.target.value as ScheduleKind; setSchedKind(k); setUnits(PRESETS[k].includes(30) ? 30 : PRESETS[k][1]) }} aria-label="How often?">
+        <select value={schedKind} onChange={(e) => { const k = e.target.value as ScheduleKind; setSchedKind(k); setUnits(LENGTH_PRESETS[k].includes(30) ? 30 : LENGTH_PRESETS[k][1]) }} aria-label="How often?">
           <option value="daily">Every day</option>
           <option value="weekly">A few times a week</option>
           <option value="every">Every few days</option>
@@ -189,7 +158,7 @@ export function NewHabit({ habits, onCreate, onCancel }: Props) {
       <fieldset className="field">
         <legend>For how many {unitName(schedule)}?</legend>
         <div className="chips">
-          {PRESETS[schedKind].map((n) => (
+          {LENGTH_PRESETS[schedKind].map((n) => (
             <button key={n} className={`chip ${effectiveUnits === n ? 'on' : ''}`} disabled={n > maxUnits} onClick={() => setUnits(n)}>
               {n}
             </button>

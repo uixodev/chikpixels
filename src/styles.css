@@ -140,3 +140,62 @@ select { font: inherit; border: 2px solid var(--ink); border-radius: 0; padding:
 .row { display: flex; gap: 12px; align-items: center; }
 .row > * { flex: 1; min-width: 0; }
 .row .num { flex: none; }
+
+/* Extend */
+.keep-going { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.keep-going .btn { align-self: auto; }
+.chapter { display: flex; flex-direction: column; gap: 12px; }
+details summary { cursor: pointer; padding: 8px 0; font-size: 14px; }
+details .board { margin-top: 8px; }
+.tile:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Holographic foil for finished pictures, like a trading card */
+.holo {
+  --mx: 50%; --my: 50%; --rx: 0deg; --ry: 0deg;
+  position: relative; isolation: isolate; overflow: hidden; line-height: 0; width: 100%;
+  transform: perspective(700px) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 0.15s ease-out;
+}
+.holo > .paper { border: 0; }
+.holo::before, .holo::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.holo::before {
+  /* rainbow foil that drifts, plus a glare that follows the pointer */
+  background:
+    radial-gradient(circle at var(--mx) var(--my), rgba(255, 255, 255, 0.65), transparent 38%),
+    linear-gradient(115deg, transparent 12%, rgba(255, 70, 140, 0.4) 26%, rgba(255, 215, 70, 0.4) 36%, rgba(70, 255, 175, 0.4) 46%, rgba(70, 195, 255, 0.4) 56%, rgba(175, 95, 255, 0.4) 66%, transparent 82%);
+  background-size: 100% 100%, 320% 320%;
+  background-position: 0 0, 0% 50%;
+  animation: holo-drift 5s ease-in-out infinite alternate;
+  mix-blend-mode: hard-light;
+}
+.holo::after {
+  /* diamond lattice and sparkles */
+  background:
+    radial-gradient(circle at 18% 22%, #fff 0 1.5px, transparent 3px),
+    radial-gradient(circle at 78% 34%, #fff 0 1.5px, transparent 3px),
+    radial-gradient(circle at 44% 72%, #fff 0 1.5px, transparent 3px),
+    radial-gradient(circle at 88% 82%, #fff 0 1.5px, transparent 3px),
+    repeating-linear-gradient(45deg, rgba(255, 60, 160, 0.34) 0 1px, transparent 1px 9px),
+    repeating-linear-gradient(-45deg, rgba(40, 200, 255, 0.34) 0 1px, transparent 1px 9px);
+  animation: holo-hue 6s linear infinite, holo-twinkle 2.4s ease-in-out infinite alternate;
+  mix-blend-mode: normal;
+}
+.holo.mini { width: 72px; flex: none; }
+.holo.mini::after { background-size: auto; }
+@keyframes holo-drift { to { background-position: 0 0, 100% 50%; } }
+@keyframes holo-hue { to { filter: hue-rotate(360deg); } }
+@keyframes holo-twinkle { from { opacity: 0.55; } to { opacity: 1; } }
+
+.card.complete {
+  border-color: transparent;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(120deg, #ff5fa2, #ffd35f, #5fffb0, #5fd0ff, #b07bff, #ff5fa2) border-box;
+  background-size: 100% 100%, 300% 300%;
+  animation: holo-border 4s linear infinite;
+}
+@keyframes holo-border { from { background-position: 0 0, 0% 50%; } to { background-position: 0 0, 150% 50%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .holo, .holo::before, .holo::after, .card.complete { animation: none; transition: none; transform: none; }
+}

@@ -1,13 +1,12 @@
-import { ArrowLeft } from './components/ArrowLeft'
 import { useEffect, useState } from 'react'
+import { ExtendHabit } from './components/ExtendHabit'
 import { Home } from './components/Home'
 import { Wordmark } from './components/Logo'
 import { NewHabit } from './components/NewHabit'
 import { Tracker } from './components/Tracker'
-import { findArt } from './lib/art'
 import { applyLog, loadState, saveState, type AppState } from './lib/habits'
 
-type View = { name: 'home' } | { name: 'new' } | { name: 'habit'; id: string }
+type View = { name: 'home' } | { name: 'new' } | { name: 'habit'; id: string } | { name: 'extend'; id: string }
 
 export default function App() {
   const [state, setState] = useState<AppState>(loadState)
@@ -16,8 +15,7 @@ export default function App() {
   useEffect(() => saveState(state), [state])
 
   const update = (fn: (s: AppState) => AppState) => setState(fn)
-  const habit = view.name === 'habit' ? state.habits.find((h) => h.id === view.id) : undefined
-  const art = habit ? findArt(habit.artId) : undefined
+  const habit = view.name === 'habit' || view.name === 'extend' ? state.habits.find((h) => h.id === view.id) : undefined
 
   return (
     <div className="app">
@@ -47,10 +45,22 @@ export default function App() {
         />
       )}
 
-      {view.name === 'habit' && habit && art && (
+      {view.name === 'extend' && habit && (
+        <ExtendHabit
+          habit={habit}
+          habits={state.habits}
+          onCancel={() => setView({ name: 'habit', id: habit.id })}
+          onExtend={(next) => {
+            update((s) => ({ ...s, habits: s.habits.map((h) => (h.id === next.id ? next : h)) }))
+            setView({ name: 'habit', id: next.id })
+          }}
+        />
+      )}
+
+      {view.name === 'habit' && habit && (
         <Tracker
           habit={habit}
-          art={art}
+          onExtend={() => setView({ name: 'extend', id: habit.id })}
           threshold={state.threshold}
           onBack={() => setView({ name: 'home' })}
           onLog={(day, value) =>
@@ -63,18 +73,7 @@ export default function App() {
         />
       )}
 
-      {view.name === 'habit' && habit && !art && (
-        <main>
-          <button className="btn ghost back" onClick={() => setView({ name: 'home' })}>
-            <ArrowLeft /> My habits
-          </button>
-          <p className="callout small">
-            <span>This habit's picture is not in the library on this device, so it cannot be shown here.</span>
-          </p>
-        </main>
-      )}
-
-      {view.name === 'habit' && !habit && (
+      {(view.name === 'habit' || view.name === 'extend') && !habit && (
         <main>
           <p className="muted">That habit no longer exists.</p>
           <button className="btn" onClick={() => setView({ name: 'home' })}>

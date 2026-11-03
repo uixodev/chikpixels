@@ -1,5 +1,12 @@
 import type { Habit, Schedule } from './habits'
 
+/** Quick length choices, in units of the schedule (days, weeks or check-ins). */
+export const LENGTH_PRESETS: Record<Schedule['kind'], number[]> = {
+  daily: [7, 14, 21, 30, 66, 100],
+  weekly: [2, 4, 8, 12],
+  every: [7, 10, 14, 20, 30],
+}
+
 export type SlotStatus = 'free' | 'past' | 'current' | 'future'
 
 export interface Slot {

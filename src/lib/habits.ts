@@ -6,12 +6,22 @@ export type Track = { type: 'effort' } | { type: 'check' } | { type: 'count'; ta
 /** What one square stands for. */
 export type Schedule = { kind: 'daily' } | { kind: 'weekly'; times: number } | { kind: 'every'; n: number }
 
+/** One picture within a habit. Extending a habit adds a chapter. */
+export interface Chapter {
+  artId: string
+  /** Number of squares (slots) this chapter spans. */
+  days: number
+  mode: Mode
+}
+
 export interface Habit {
   id: string
   name: string
   artId: string
   days: number
   mode: Mode
+  /** Absent until the habit is extended; then lists every picture in order. */
+  chapters?: Chapter[]
   track: Track
   schedule: Schedule
   /** When set, squares follow the calendar from this date (YYYY-MM-DD). Otherwise they are free slots. */
@@ -33,7 +43,6 @@ export interface AppState {
 
 export const DEFAULT_THRESHOLD = 20
 export const STORAGE_KEY = 'chikpixels:v1'
-export const LENGTH_PRESETS = [7, 14, 21, 30, 66, 100]
 
 export function emptyState(): AppState {
   return { version: 1, threshold: DEFAULT_THRESHOLD, habits: [] }
@@ -121,6 +130,38 @@ export function applyLog(habit: Habit, day: number, value: number | null, thresh
   const complete = revealedCount(next, threshold) >= next.days
   if (complete && !next.completedAt) next.completedAt = todayISO()
   if (!complete) delete next.completedAt
+  return next
+}
+
+export function chaptersOf(habit: Habit): Chapter[] {
+  return habit.chapters ?? [{ artId: habit.artId, days: habit.days, mode: habit.mode }]
+}
+
+export interface ChapterRange extends Chapter {
+  index: number
+  /** Index of this chapter's first slot within the habit. */
+  offset: number
+}
+
+export function chapterRanges(habit: Habit): ChapterRange[] {
+  let offset = 0
+  return chaptersOf(habit).map((c, index) => {
+    const range = { ...c, index, offset }
+    offset += c.days
+    return range
+  })
+}
+
+export function chapterRevealed(habit: Habit, range: { offset: number; days: number }, threshold: number): number {
+  let n = 0
+  for (let d = range.offset; d < range.offset + range.days; d++) if (isRevealed(habit.efforts[d], threshold)) n++
+  return n
+}
+
+/** Add a new picture after the current ones. Nothing already logged changes. */
+export function extendHabit(habit: Habit, chapter: Chapter): Habit {
+  const next: Habit = { ...habit, chapters: [...chaptersOf(habit), chapter], days: habit.days + chapter.days }
+  delete next.completedAt
   return next
 }
 

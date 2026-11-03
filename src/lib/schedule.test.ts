@@ -66,3 +66,34 @@ describe('applyLog', () => {
     expect(h.completedAt).toBeUndefined()
   })
 })
+
+import { chapterRanges, chapterRevealed, chaptersOf, extendHabit } from './habits'
+
+describe('extending a habit', () => {
+  const tracked: Habit = { ...base, days: 3, track: { type: 'check' } }
+
+  it('treats a habit without chapters as one chapter', () => {
+    expect(chaptersOf(tracked)).toEqual([{ artId: 'heart', days: 3, mode: 'chosen' }])
+  })
+
+  it('appends a chapter, keeps progress and reopens a finished habit', () => {
+    let h = applyLog(applyLog(applyLog(tracked, 0, 1, 20), 1, 1, 20), 2, 1, 20)
+    expect(h.completedAt).toBeDefined()
+    h = extendHabit(h, { artId: 'star', days: 2, mode: 'secret' })
+    expect(h.days).toBe(5)
+    expect(h.completedAt).toBeUndefined()
+    expect(h.efforts).toEqual({ 0: 100, 1: 100, 2: 100 })
+    const ranges = chapterRanges(h)
+    expect(ranges.map((r) => [r.offset, r.days])).toEqual([[0, 3], [3, 2]])
+    expect(chapterRevealed(h, ranges[0], 20)).toBe(3)
+    expect(chapterRevealed(h, ranges[1], 20)).toBe(0)
+  })
+
+  it('completes again only when the new chapter is finished', () => {
+    let h = extendHabit({ ...tracked, days: 1 }, { artId: 'star', days: 1, mode: 'chosen' })
+    h = applyLog(h, 0, 1, 20)
+    expect(h.completedAt).toBeUndefined()
+    h = applyLog(h, 1, 1, 20)
+    expect(h.completedAt).toBeDefined()
+  })
+})

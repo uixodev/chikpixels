@@ -1,20 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Art } from '../lib/art'
-import { brightness, isRevealed, revealedCount, todayISO, type Habit } from '../lib/habits'
-import { describeSchedule, slotInfo } from '../lib/schedule'
+import { findArt, type Art } from '../lib/art'
+import { brightness, chapterRanges, chapterRevealed, isRevealed, revealedCount, todayISO, type ChapterRange, type Habit } from '../lib/habits'
 import { splitIntoRegions } from '../lib/regions'
+import { describeSchedule, slotInfo } from '../lib/schedule'
 import { ArrowLeft } from './ArrowLeft'
 import { Confetti } from './Confetti'
+import { Holo } from './Holo'
 import { LogSheet } from './LogSheet'
 import { PixelCanvas } from './PixelCanvas'
 
 interface Props {
   habit: Habit
-  art: Art
   threshold: number
   onLog: (day: number, value: number | null) => void
   onDelete: () => void
   onBack: () => void
+  onExtend: () => void
 }
 
 function trackSummary(habit: Habit): string {
@@ -23,33 +24,36 @@ function trackSummary(habit: Habit): string {
   return `${how} · ${describeSchedule(habit.schedule)}${habit.startDate ? '' : ' · any order'}`
 }
 
-export function Tracker({ habit, art, threshold, onLog, onDelete, onBack }: Props) {
-  const [editing, setEditing] = useState<number | null>(null)
-  const [peek, setPeek] = useState(false)
-  const [celebrate, setCelebrate] = useState(false)
-  const today = todayISO()
+interface ChapterProps {
+  habit: Habit
+  range: ChapterRange
+  art: Art | undefined
+  total: number
+  threshold: number
+  today: string
+  complete: boolean
+  collapse: boolean
+  onPick: (slot: number) => void
+}
 
-  const regions = useMemo(() => splitIntoRegions(art.pixels, art.width, art.height, habit.days), [art, habit.days])
+function ChapterView({ habit, range, art, total, threshold, today, complete, collapse, onPick }: ChapterProps) {
+  const [peek, setPeek] = useState(false)
+  const regions = useMemo(() => (art ? splitIntoRegions(art.pixels, art.width, art.height, range.days) : []), [art, range.days])
   const pixelBrightness = useMemo(() => {
-    const out: (number | undefined)[] = new Array(art.pixels.length).fill(undefined)
+    const out: (number | undefined)[] = art ? new Array(art.pixels.length).fill(undefined) : []
     regions.forEach((region, d) => {
-      const e = habit.efforts[d]
+      const e = habit.efforts[range.offset + d]
       if (isRevealed(e, threshold)) region.forEach((i) => (out[i] = brightness(e, threshold)))
     })
     return out
-  }, [art, regions, habit.efforts, threshold])
+  }, [art, regions, habit.efforts, range.offset, threshold])
 
-  const done = revealedCount(habit, threshold)
-  const complete = done >= habit.days
-  const wasComplete = useRef(complete)
-  useEffect(() => {
-    if (complete && !wasComplete.current) setCelebrate(true)
-    wasComplete.current = complete
-  }, [complete])
+  if (!art) {
+    return <p className="callout small"><span>This chapter's picture is not in the library on this device.</span></p>
+  }
 
-  const mystery = habit.mode === 'secret' && !complete
-  const palette = useMemo(() => Array.from(new Set(art.pixels.map((p) => p.color))).slice(0, 8), [art])
-  const editingSlot = editing !== null ? slotInfo(habit, editing, today) : undefined
+  const mystery = range.mode === 'secret' && !complete
+  const slots = Array.from({ length: range.days }, (_, i) => range.offset + i)
 
   function describeLog(d: number): string {
     const e = habit.efforts[d]
@@ -58,6 +62,82 @@ export function Tracker({ habit, art, threshold, onLog, onDelete, onBack }: Prop
     if (habit.track.type === 'count') return `${habit.counts?.[d] ?? 0} of ${habit.track.target} ${habit.track.unit}`
     return `effort ${e}`
   }
+
+  const board = (
+    <div className="board">
+      {slots.map((d) => {
+        const e = habit.efforts[d]
+        const slot = slotInfo(habit, d, today)
+        const state = e === undefined ? 'empty' : isRevealed(e, threshold) ? 'done' : 'low'
+        return (
+          <button
+            key={d}
+            className={`day ${state} ${slot.status === 'current' ? 'today' : ''}`}
+            style={state === 'done' ? { opacity: 0.45 + 0.55 * (e / 100) } : undefined}
+            disabled={slot.status === 'future'}
+            onClick={() => onPick(d)}
+            aria-label={`${slot.label}${slot.dates ? `, ${slot.dates}` : ''}, ${describeLog(d)}`}
+            title={slot.dates ? `${slot.label} · ${slot.dates}` : slot.label}
+          >
+            {d + 1}
+          </button>
+        )
+      })}
+    </div>
+  )
+
+  return (
+    <section className="chapter">
+      <p className="muted">
+        {total > 1 ? `Picture ${range.index + 1} of ${total} · ` : ''}
+        {mystery ? 'A secret picture' : art.name}
+      </p>
+      {complete ? (
+        <Holo className="stage">
+          <PixelCanvas art={art} brightness={pixelBrightness} label={art.name} />
+        </Holo>
+      ) : (
+        <PixelCanvas art={art} brightness={pixelBrightness} ghost={peek && range.mode === 'chosen'} className="stage" label={mystery ? 'Your picture so far' : art.name} />
+      )}
+      {range.mode === 'chosen' && !complete && (
+        <button className="btn small" onClick={() => setPeek((p) => !p)} aria-pressed={peek}>
+          {peek ? 'Hide outline' : 'Peek at outline'}
+        </button>
+      )}
+      {collapse ? (
+        <details>
+          <summary>Show squares ({range.days})</summary>
+          {board}
+        </details>
+      ) : (
+        board
+      )}
+    </section>
+  )
+}
+
+export function Tracker({ habit, threshold, onLog, onDelete, onBack, onExtend }: Props) {
+  const [editing, setEditing] = useState<number | null>(null)
+  const [celebrate, setCelebrate] = useState<number | null>(null)
+  const today = todayISO()
+
+  const ranges = chapterRanges(habit)
+  const states = ranges.map((r) => ({ range: r, complete: chapterRevealed(habit, r, threshold) >= r.days }))
+  const completeKey = states.map((s) => (s.complete ? 1 : 0)).join('')
+  const done = revealedCount(habit, threshold)
+  const allComplete = done >= habit.days
+
+  const seen = useRef(completeKey)
+  useEffect(() => {
+    const before = seen.current
+    for (let i = 0; i < completeKey.length; i++) if (completeKey[i] === '1' && before[i] !== '1') setCelebrate(i)
+    seen.current = completeKey
+  }, [completeKey])
+
+  const celebrating = celebrate !== null ? ranges[celebrate] : undefined
+  const celebratingArt = celebrating ? findArt(celebrating.artId) : undefined
+  const palette = useMemo(() => (celebratingArt ? Array.from(new Set(celebratingArt.pixels.map((p) => p.color))).slice(0, 8) : []), [celebratingArt])
+  const editingSlot = editing !== null ? slotInfo(habit, editing, today) : undefined
 
   return (
     <main>
@@ -70,42 +150,41 @@ export function Tracker({ habit, art, threshold, onLog, onDelete, onBack }: Prop
           {done}/{habit.days}
         </span>
       </div>
-      <p className="muted">{mystery ? 'A secret picture' : art.name}</p>
       <p className="muted">{trackSummary(habit)}</p>
 
-      <PixelCanvas art={art} brightness={pixelBrightness} ghost={peek && habit.mode === 'chosen' && !complete} className="stage" label={mystery ? 'Your picture so far' : art.name} />
-
-      {habit.mode === 'chosen' && !complete && (
-        <button className="btn small" onClick={() => setPeek((p) => !p)} aria-pressed={peek}>
-          {peek ? 'Hide outline' : 'Peek at outline'}
-        </button>
+      {allComplete && (
+        <div className="callout small keep-going">
+          <span>Habit complete! Want to keep going? Add another picture and carry on.</span>
+          <button className="btn primary small" onClick={onExtend}>
+            Extend habit
+          </button>
+        </div>
       )}
 
-      <h2>{habit.startDate ? 'Your calendar' : 'Tap a square to log it'}</h2>
+      {states.map(({ range, complete }) => (
+        <ChapterView
+          key={range.index}
+          habit={habit}
+          range={range}
+          art={findArt(range.artId)}
+          total={ranges.length}
+          threshold={threshold}
+          today={today}
+          complete={complete}
+          collapse={complete && range.index < ranges.length - 1}
+          onPick={setEditing}
+        />
+      ))}
+
       <p className="muted">
-        {habit.startDate ? 'Tap today, or fill in an earlier one you missed.' : 'Pick any slot, in any order. Missed one? Fill it in later.'}
+        {habit.startDate ? 'Tap today, or fill in an earlier square you missed.' : 'Pick any square, in any order. Missed one? Fill it in later.'}
       </p>
-      <div className="board">
-        {Array.from({ length: habit.days }, (_, d) => {
-          const e = habit.efforts[d]
-          const slot = slotInfo(habit, d, today)
-          const state = e === undefined ? 'empty' : isRevealed(e, threshold) ? 'done' : 'low'
-          const future = slot.status === 'future'
-          return (
-            <button
-              key={d}
-              className={`day ${state} ${slot.status === 'current' ? 'today' : ''}`}
-              style={state === 'done' ? { opacity: 0.45 + 0.55 * (e / 100) } : undefined}
-              disabled={future}
-              onClick={() => setEditing(d)}
-              aria-label={`${slot.label}${slot.dates ? `, ${slot.dates}` : ''}, ${describeLog(d)}`}
-              title={slot.dates ? `${slot.label} · ${slot.dates}` : slot.label}
-            >
-              {d + 1}
-            </button>
-          )
-        })}
-      </div>
+
+      {!allComplete && (
+        <button className="btn small" onClick={onExtend}>
+          + Extend this habit
+        </button>
+      )}
 
       <button
         className="btn ghost danger"
@@ -136,18 +215,33 @@ export function Tracker({ habit, art, threshold, onLog, onDelete, onBack }: Prop
         />
       )}
 
-      {celebrate && (
-        <div className="scrim celebrate" onClick={() => setCelebrate(false)}>
+      {celebrating && celebratingArt && (
+        <div className="scrim celebrate" onClick={() => setCelebrate(null)}>
           <Confetti colors={palette} />
           <div className="sheet" onClick={(e) => e.stopPropagation()}>
-            <h2>You did it!</h2>
-            <PixelCanvas art={art} full className="stage small" label={art.name} />
+            <h2>{allComplete ? 'You did it!' : 'Picture complete!'}</h2>
+            <Holo className="stage small">
+              <PixelCanvas art={celebratingArt} full label={celebratingArt.name} />
+            </Holo>
             <p>
-              Your picture was <b>{art.name}</b>.
+              Your picture was <b>{celebratingArt.name}</b>.
             </p>
-            <button className="btn primary" onClick={() => setCelebrate(false)}>
-              Nice
-            </button>
+            <div className="actions">
+              <button className="btn primary" onClick={() => setCelebrate(null)}>
+                Nice
+              </button>
+              {allComplete && (
+                <button
+                  className="btn"
+                  onClick={() => {
+                    setCelebrate(null)
+                    onExtend()
+                  }}
+                >
+                  Keep going
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

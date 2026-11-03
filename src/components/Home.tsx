@@ -1,5 +1,6 @@
 import { findArt } from '../lib/art'
-import { revealedCount, type AppState } from '../lib/habits'
+import { chapterRanges, chapterRevealed, revealedCount, type AppState } from '../lib/habits'
+import { Holo } from './Holo'
 import { PixelCanvas } from './PixelCanvas'
 import { useMemo } from 'react'
 import { splitIntoRegions } from '../lib/regions'
@@ -13,29 +14,37 @@ interface Props {
 }
 
 function Card({ habit, threshold, onOpen }: { habit: Habit; threshold: number; onOpen: () => void }) {
-  const art = findArt(habit.artId)
+  // Show the picture currently in progress (or the last one once everything is done).
+  const ranges = chapterRanges(habit)
+  const range = ranges.find((r) => chapterRevealed(habit, r, threshold) < r.days) ?? ranges[ranges.length - 1]
+  const art = findArt(range.artId)
   const done = revealedCount(habit, threshold)
-  const regions = useMemo(
-    () => (art ? splitIntoRegions(art.pixels, art.width, art.height, habit.days) : []),
-    [art, habit.days],
-  )
+  const complete = done >= habit.days
+  const regions = useMemo(() => (art ? splitIntoRegions(art.pixels, art.width, art.height, range.days) : []), [art, range.days])
   const pixelBrightness = useMemo(() => {
     const out: (number | undefined)[] = []
-    if (!art) return out
     regions.forEach((r, d) => {
-      if ((habit.efforts[d] ?? -1) >= threshold) r.forEach((i) => (out[i] = 1))
+      if ((habit.efforts[range.offset + d] ?? -1) >= threshold) r.forEach((i) => (out[i] = 1))
     })
     return out
-  }, [art, regions, habit.efforts, threshold])
-  const complete = done >= habit.days
+  }, [regions, habit.efforts, range.offset, threshold])
 
   return (
-    <button className="card" onClick={onOpen}>
-      {art ? <PixelCanvas art={art} brightness={pixelBrightness} className="mini" /> : <div className="mini missing">?</div>}
+    <button className={`card ${complete ? 'complete' : ''}`} onClick={onOpen}>
+      {!art ? (
+        <div className="mini missing">?</div>
+      ) : complete ? (
+        <Holo className="mini">
+          <PixelCanvas art={art} full />
+        </Holo>
+      ) : (
+        <PixelCanvas art={art} brightness={pixelBrightness} className="mini" />
+      )}
       <div className="card-body">
         <strong>{habit.name}</strong>
         <span className="muted">
           {complete ? `Complete${habit.completedAt ? ' · ' + habit.completedAt : ''}` : `${done} / ${habit.days} revealed`}
+          {ranges.length > 1 ? ` · ${ranges.length} pictures` : ''}
         </span>
         <span className="bar" aria-hidden="true">
           <i style={{ width: `${(done / habit.days) * 100}%` }} />
