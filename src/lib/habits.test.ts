@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { brightness, emptyState, fogMix, isRevealed, parseState, revealedCount, type Habit } from './habits'
 
 const habit = (efforts: Record<number, number>): Habit => ({
-  id: 'h', name: 'n', artId: 'heart', days: 5, mode: 'chosen', efforts, createdAt: '2026-01-01',
+  id: 'h', name: 'n', artId: 'heart', days: 5, mode: 'chosen', track: { type: 'effort' }, schedule: { kind: 'daily' }, efforts, createdAt: '2026-01-01',
 })
 
 describe('effort and brightness', () => {

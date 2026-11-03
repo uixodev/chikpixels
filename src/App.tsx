@@ -5,22 +5,9 @@ import { Wordmark } from './components/Logo'
 import { NewHabit } from './components/NewHabit'
 import { Tracker } from './components/Tracker'
 import { findArt } from './lib/art'
-import { loadState, revealedCount, saveState, type AppState, type Habit } from './lib/habits'
+import { applyLog, loadState, saveState, type AppState } from './lib/habits'
 
 type View = { name: 'home' } | { name: 'new' } | { name: 'habit'; id: string }
-
-const today = () => new Date().toLocaleDateString('en-CA')
-
-function withEffort(habit: Habit, day: number, effort: number | null, threshold: number): Habit {
-  const efforts = { ...habit.efforts }
-  if (effort === null) delete efforts[day]
-  else efforts[day] = effort
-  const next = { ...habit, efforts }
-  const complete = revealedCount(next, threshold) >= next.days
-  if (complete && !next.completedAt) next.completedAt = today()
-  if (!complete) delete next.completedAt
-  return next
-}
 
 export default function App() {
   const [state, setState] = useState<AppState>(loadState)
@@ -66,8 +53,8 @@ export default function App() {
           art={art}
           threshold={state.threshold}
           onBack={() => setView({ name: 'home' })}
-          onEffort={(day, effort) =>
-            update((s) => ({ ...s, habits: s.habits.map((h) => (h.id === habit.id ? withEffort(h, day, effort, s.threshold) : h)) }))
+          onLog={(day, value) =>
+            update((s) => ({ ...s, habits: s.habits.map((h) => (h.id === habit.id ? applyLog(h, day, value, s.threshold) : h)) }))
           }
           onDelete={() => {
             update((s) => ({ ...s, habits: s.habits.filter((h) => h.id !== habit.id) }))

@@ -109,6 +109,8 @@ input[type='range'] { width: 100%; accent-color: var(--ink); }
 .board { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; }
 .day { font: inherit; font-size: 13px; min-height: 44px; border: 2px solid var(--ink); background: var(--paper); cursor: pointer; border-radius: 0; color: var(--ink); }
 .day.done { background: var(--ink); color: var(--paper); }
+.day.today { outline: 3px solid #1a73e8; outline-offset: 1px; }
+.day:disabled { opacity: 0.3; cursor: not-allowed; border-style: dotted; }
 .day.low { border-style: dashed; background: repeating-linear-gradient(45deg, #fff, #fff 4px, #eee 4px, #eee 8px); }
 
 /* Sheets */
@@ -131,3 +133,10 @@ input[type='range'] { width: 100%; accent-color: var(--ink); }
   .confetti { display: none; }
   .btn:active { transform: none; }
 }
+
+.stepper { display: flex; gap: 12px; align-items: center; justify-content: center; }
+.stepper .num { width: 96px; font-size: 20px; }
+select { font: inherit; border: 2px solid var(--ink); border-radius: 0; padding: 10px 12px; background: var(--paper); min-height: 44px; width: 100%; }
+.row { display: flex; gap: 12px; align-items: center; }
+.row > * { flex: 1; min-width: 0; }
+.row .num { flex: none; }

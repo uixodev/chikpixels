@@ -1,13 +1,25 @@
 export type Mode = 'secret' | 'chosen'
 
+/** How a day is logged. Count turns progress toward a target into effort. */
+export type Track = { type: 'effort' } | { type: 'check' } | { type: 'count'; target: number; unit: string }
+
+/** What one square stands for. */
+export type Schedule = { kind: 'daily' } | { kind: 'weekly'; times: number } | { kind: 'every'; n: number }
+
 export interface Habit {
   id: string
   name: string
   artId: string
   days: number
   mode: Mode
-  /** Effort (0-100) per day slot. A slot with no entry has not been logged. */
+  track: Track
+  schedule: Schedule
+  /** When set, squares follow the calendar from this date (YYYY-MM-DD). Otherwise they are free slots. */
+  startDate?: string
+  /** Effort (0-100) per slot. A slot with no entry has not been logged. For count habits this is progress toward the target. */
   efforts: Record<number, number>
+  /** Raw counts per slot, for count habits. */
+  counts?: Record<number, number>
   createdAt: string
   completedAt?: string
 }
@@ -80,6 +92,36 @@ export function fogMix(hex: string, b: number): string {
   const ch = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
   const out = ch.map((c, i) => Math.round(FOG[i] * (1 - b) + c * b))
   return `rgb(${out[0]}, ${out[1]}, ${out[2]})`
+}
+
+export function effortFromCount(count: number, target: number): number {
+  return Math.min(100, Math.round((count / Math.max(1, target)) * 100))
+}
+
+export const todayISO = (): string => new Date().toLocaleDateString('en-CA')
+
+/**
+ * Log or clear one slot. `value` is the effort (effort habits), ignored (check-in habits,
+ * which always log as done) or the count (count habits). `null` clears the slot.
+ */
+export function applyLog(habit: Habit, day: number, value: number | null, threshold: number): Habit {
+  const efforts = { ...habit.efforts }
+  const counts = { ...(habit.counts ?? {}) }
+  const { track } = habit
+  if (value === null || (track.type === 'count' && value <= 0)) {
+    delete efforts[day]
+    delete counts[day]
+  } else if (track.type === 'count') {
+    counts[day] = value
+    efforts[day] = effortFromCount(value, track.target)
+  } else {
+    efforts[day] = track.type === 'check' ? 100 : value
+  }
+  const next: Habit = { ...habit, efforts, counts }
+  const complete = revealedCount(next, threshold) >= next.days
+  if (complete && !next.completedAt) next.completedAt = todayISO()
+  if (!complete) delete next.completedAt
+  return next
 }
 
 export function newId(): string {
